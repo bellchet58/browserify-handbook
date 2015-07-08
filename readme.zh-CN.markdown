@@ -448,11 +448,8 @@ Browserify 是运行在server端的build过程。它会生产一个包含所有�
 ### window globals
 
 每个js文件在window host 对象上定义一个全局变量 或者 自行组织一个namespace的形式。
-
 这种方式因为每个文件都需要一个script 标签,不能scale up,大规模应用,而且script标签的顺序很重要.
-
 重构或维护这种方式构成的应用很困难,但是所有的浏览器都原生支持这种方式.不需要其他的server 端红菊的参与.
-
 每个script标签的http request导致应用很慢.
 
 ### 拼接
@@ -495,53 +492,32 @@ asynchronous feature of AMD.
 
 ### bundling commonjs server-side
 
-反正都是要在Server端build下,为什么不废弃掉整个AMD代码,用 build CommonJS 代替.
-在工具的帮助下,你可以
+反正都是要在Server端build下,为什么不废弃掉整个AMD代码 , 用 build CommonJS 代替.
+在工具的帮助下,你可以解析模块的依赖顺序以及开发环境生产环境更加一致 , 以及更加健壮. 
+CommonJS的语法更加方便 , 更因node.js & npm 导致cjs的生态系统的爆发.
 
+你可以再node & browser之间无缝的分享代码. 只需要一个build步骤以及生成source maps和自定重新rebuild的工具.
 
-
-
-
-
-
-With tooling you can resolve modules to address order-sensitivity and
-your development and production environments will be much more similar and less
-fragile. The CJS syntax is nicer and the ecosystem is exploding because of node
-and npm.
-
-You can seamlessly share code between node and the browser. You just need a
-build step and some tooling for source maps and auto-rebuilding.
-
-Plus, we can use node's module lookup algorithms to save us from version
-mismatch insanity so that we can have multiple conflicting versions of different
-required packages in the same application and everything will still work. To
-save bytes down the wire you can dedupe, which is covered elsewhere in this
-document.
+而且 , 我们可以使用node的模块查找方法来防止模块版本不一致的问题 , 我们可以在同一个app里面使用同一个lib的不同版本 , 
+应用还可以工作. 为了节省空间 , 可以使用 depupe , 就是npm depupe , 详见 https://docs.npmjs.com/cli/dedupe.
 
 # development
 
-Concatenation has some downsides, but these can be very adequately addressed
-with development tooling.
+基于拼接模式会有一些缺点 , 但是这些问题都可以用响应的工具解决.
 
 ## source maps
 
-Browserify supports a `--debug`/`-d` flag and `opts.debug` parameter to enable
-source maps. Source maps tell the browser to convert line and column offsets for
-exceptions thrown in the bundle file back into the offsets and filenames of the
-original sources.
+Browserify 支持一个 `--debug`/`-d` 选项以及 `opts.debug` 参数来开启source maps支持.
+Source maps 告诉浏览器如何转换代码的行和列以得到build之前的源代码. 
 
-The source maps include all the original file contents inline so that you can
-simply put the bundle file on a web server and not need to ensure that all the
-original source contents are accessible from the web server with paths set up
-correctly.
+Source maps 包含所有的原始代码,所以你可以简单的把bundle 文件放在服务器上而不必确认所有的原始文件
+都放在正确的相应位置.
 
 ### exorcist
 
-The downside of inlining all the source files into the inline source map is that
-the bundle is twice as large. This is fine for debugging locally but not
-practical for shipping source maps to production. However, you can use
-[exorcist](https://npmjs.org/package/exorcist) to pull the inline source map out
-into a separate `bundle.map.js` file:
+将source maps 放在build之后的bundle里的缺点就是 build的文件是原来的两杯大. 本地测试是没什么问题的, 但是不适合将source maps
+inline到生产环境. 然而可以使用[exorcist](https://npmjs.org/package/exorcist) 将source maps放到独立的文件中,如
+`bundle.map.js`. 
 
 ``` sh
 browserify main.js --debug | exorcist bundle.js.map > bundle.js
@@ -1133,7 +1109,7 @@ utility fiefdom.
 
 # organizing modules
 
-## avoiding ../../../../../../..
+## 避免 ../../../../../../..
 
 Not everything in an application properly belongs on the public npm and the
 overhead of setting up a private npm or git repo is still rather large in many
