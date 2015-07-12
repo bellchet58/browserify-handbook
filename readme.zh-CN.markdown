@@ -1,29 +1,23 @@
-# introduction
+# 介绍
 
-This document covers how to use [browserify](http://browserify.org) to build
-modular applications.
+本文是substack/browserify-handbook 的简体中文翻译. 由magicdawn(magicdawn@qq.com)翻译.
+这篇文章介绍了如何使用[browserify](http://browserify.org)来构建模块化的应用.
 
 [![cc-by-3.0](http://i.creativecommons.org/l/by/3.0/80x15.png)](http://creativecommons.org/licenses/by/3.0/)
 
-browserify is a tool for compiling
-[node-flavored](http://nodejs.org/docs/latest/api/modules.html) commonjs modules
-for the browser.
+browserify是一个使用[node支持的CommonJS模块标准](http://nodejs.org/docs/latest/api/modules.html)
+来为浏览器编译模块.
 
-You can use browserify to organize your code and use third-party libraries even
-if you don't use [node](http://nodejs.org) itself in any other capacity except
-for bundling and installing packages with npm.
+你可以使用browserify来组织你的代码以及第三方库即使你只使用[node](http://nodejs.org)的npm来安装打包代码.
 
-The module system that browserify uses is the same as node, so
-packages published to [npm](https://npmjs.org) that were originally intended for
-use in node but not browsers will work just fine in the browser too.
+browserify所使用的模块系统跟node使用的是一致的, 那些发布到[npm](https://npmjs.org)上原本只想运行在node上
+的包也可以很好的运行在浏览器中.
 
-Increasingly, people are publishing modules to npm which are intentionally
-designed to work in both node and in the browser using browserify and many
-packages on npm are intended for use in just the browser.
-[npm is for all javascript](http://maxogden.com/node-packaged-modules.html),
-front or backend alike.
+慢慢地, 开发者们把node端以及通过browserify运行在浏览器端的代码发布到npm, npm上还有一些只运行在浏览器端的包.
+[npm is for all javascript](http://maxogden.com/node-packaged-modules.html),npm是JavaScript的包管理器, 
+不管是Frontend还是Backend.
 
-# table of contents
+# 目录
 
 - [introduction](#introduction)
 - [table of contents](#table-of-contents)
@@ -102,34 +96,31 @@ front or backend alike.
 
 # node packaged manuscript
 
-You can install this handbook with npm, appropriately enough. Just do:
-
+你可以通过npm安装这本handbook, 很恰当. 只需要键入:
 ```
-npm install -g browserify-handbook
+# 简体中文翻译
+npm install browserify-handbook-zhcn
+
+# english version
+npm install browserify-handbook
 ```
 
-Now you will have a `browserify-handbook` command that will open this readme
-file in your `$PAGER`. Otherwise, you may continue reading this document as you
-are presently doing.
+现在你可以使用 `browserify-handbook` 命令使用`$PAGER` 环境变量指定的阅读器打开这份README文件.
+当然你也可以继续阅读, 就像你现在这样.
 
 # node packaged modules
 
-Before we can dive too deeply into how to use browserify and how it works, it is
-important to first understand how the
-[node-flavored version](http://nodejs.org/docs/latest/api/modules.html)
-of the commonjs module system works.
+在我们深入如何使用browserify以及它是如何工作的, 了解nodejs支持的commonjs 模块系统如何工作十分重要.
 
 ## require
 
-In node, there is a `require()` function for loading code from other files.
-
-If you install a module with [npm](https://npmjs.org):
+在node中, 有一个`require()` 函数可以从其他文件中加载代码, 如果你使用npm来安装一个模块:
 
 ```
 npm install uniq
 ```
 
-Then in a file `nums.js` we can `require('uniq')`:
+然后有一个叫 `nums.js` 的文件, 我们可以 `require('uniq')`:
 
 ```
 var uniq = require('uniq');
@@ -137,77 +128,62 @@ var nums = [ 5, 2, 1, 3, 2, 5, 4, 2, 0, 1 ];
 console.log(uniq(nums));
 ```
 
-The output of this program when run with node is:
-
+使用node运行这个小程序的输出是:
 ```
 $ node nums.js
 [ 0, 1, 2, 3, 4, 5 ]
 ```
 
-You can require relative files by requiring a string that starts with a `.`. For
-example, to load a file `foo.js` from `main.js`, in `main.js` you can do:
-
+你可以通过给require函数传一个以 `.` 开头的string来require其他相对路径的文件.
+例如, 要从 `main.js` 加载 `foo.js`, 在 `main.js` 中你可以:
 ``` js
 var foo = require('./foo.js');
 console.log(foo(4));
 ```
-
-If `foo.js` was in the parent directory, you could use `../foo.js` instead:
-
+如果 `foo.js` 是在父文件夹, 你可以使用 `../foo.js` 代替:
 ``` js
 var foo = require('../foo.js');
 console.log(foo(4));
 ```
 
-or likewise for any other kind of relative path. Relative paths are always
-resolved with respect to the invoking file's location.
+同样, 对于其他类型的相对路径, 相对路径总是以调用require函数的那个文件的位置来寻找.
 
-Note that `require()` returned a function and we assigned that return value to a
-variable called `uniq`. We could have picked any other name and it would have
-worked the same. `require()` returns the exports of the module name that you
-specify.
+注意 `require()` 返回了一个function, 然后我们把它赋值给了 `uniq` 变量. 我们可以另取一个名字, 也可以正常工作. 
+`require()` 返回的是你指定的模块的导出值(exports).
 
-How `require()` works is unlike many other module systems where imports are akin
-to statements that expose themselves as globals or file-local lexicals with
-names declared in the module itself outside of your control. Under the node
-style of code import with `require()`, someone reading your program can easily
-tell where each piece of functionality came from. This approach scales much
-better as the number of modules in an application grows.
+`require()` 的工作方式不同于其他很多的模块系统, 其他很多模块系统的 imports 是类似于将名称暴露在全局空间或者
+本地文件作用域的语句, 其中用到的名称不是模块使用者能够控制的. 
+
+在node下通过 `require()` 方式导入的代码, 别人阅读你的程序的源代码的时候可以轻易的知道每一段代码或者某一个函数从
+哪里来. 当应用中的模块数量多起来后这种方式可伸缩性更好. 
 
 ## exports
 
-To export a single thing from a file so that other files may import it, assign
-over the value at `module.exports`:
-
+从一个文件导出只导出一个东西, 别的模块可以导入它, 将要导出的东西赋值给 `module.exports` :
 ``` js
 module.exports = function (n) {
     return n * 111
 };
 ```
-
-Now when some module `main.js` loads your `foo.js`, the return value of
-`require('./foo.js')` will be the exported function:
-
+现在如果某个模块 `main.js` 需要加载你的 `foo.js` , `require('./foo.js')` 的返回值会是刚导出的function:
 ``` js
 var foo = require('./foo.js');
 console.log(foo(5));
 ```
 
-This program will print:
+程序将会输出:
 
 ```
 555
 ```
 
-You can export any kind of value with `module.exports`, not just functions.
-
-For example, this is perfectly fine:
-
+你可以通过 `module.exports` 导出任何类型的值, 不只是function类型.
+例如, 下面这个例子也是极好的:
 ``` js
 module.exports = 555
 ```
 
-and so is this:
+下面这样也是:
 
 ``` js
 var numbers = [];
@@ -215,66 +191,51 @@ for (var i = 0; i < 100; i++) numbers.push(i);
 
 module.exports = numbers;
 ```
-
-There is another form of doing exports specifically for exporting items onto an
-object. Here, `exports` is used instead of `module.exports`:
-
+还有另一种导出的方法, 通过object导出. 在这里使用 `exports` 来代替 `module.exports` :
 ``` js
 exports.beep = function (n) { return n * 1000 }
 exports.boop = 555
 ```
 
-This program is the same as:
+上面的程序与下面是相同的:
 
 ``` js
 module.exports.beep = function (n) { return n * 1000 }
 module.exports.boop = 555
 ```
+因为 `module.exports` 与 `exports` 是相同的, 被初始化为一个空的object.
 
-because `module.exports` is the same as `exports` and is initially set to an
-empty object.
-
-Note however that you can't do:
+注意你不能这样做:
 
 ``` js
 // this doesn't work
 exports = function (n) { return n * 1000 }
 ```
 
-because the export value lives on the `module` object, and so assigning a new
-value for `exports` instead of `module.exports` masks the original reference. 
-
-Instead if you are going to export a single item, always do:
-
+因为导出值是附加在 `module` 对象上的, 所以为 `exports` 赋一个新值而不是 `module.exports` 会掩盖初始的引用.
+如果你是要导出一个单项, 总是使用 `module.exports` :
 ``` js
 // instead
 module.exports = function (n) { return n * 1000 }
 ```
-
-If you're still confused, try to understand how modules work in
-the background:
-
+如果你仍然很困惑, 可以尝试理解下模块系统是如何工作的:
 ``` js
 var module = {
   exports: {}
 };
 
-// If you require a module, it's basically wrapped in a function
+// 如果你requore一个module, 模块系统会简单的将文件包装一层function
 (function(module, exports) {
   exports = function (n) { return n * 1000 };
 }(module, module.exports))
 
-console.log(module.exports); // it's still an empty object :(
+console.log(module.exports); // 现在module.exports仍然还是空的object 
 ```
+通常情况下, 你会使用 `module.exports` 来导出单个function 或者 构造器, 因为一个模块只做一件事通常来说是最好的做法.
+`exports` 一开始是最主要的导出方式, `module.exports`是替补的, 但是 `module.exports` 被证明更加实用, 有用, 因为
+其直接, 清晰, 防止冗余.
 
-Most of the time, you will want to export a single function or constructor with
-`module.exports` because it's usually best for a module to do one thing.
-
-The `exports` feature was originally the primary way of exporting functionality
-and `module.exports` was an afterthought, but `module.exports` proved to be much
-more useful in practice at being more direct, clear, and avoiding duplication.
-
-In the early days, this style used to be much more common:
+在早期的时候,下面这种方式更通用:
 
 foo.js:
 
@@ -289,8 +250,7 @@ var foo = require('./foo.js');
 console.log(foo.foo(5));
 ```
 
-but note that the `foo.foo` is a bit superfluous. Using `module.exports` it
-becomes more clear:
+但是请注意 `foo.foo` 有点多余, 使用 `module.exports` 变得更加清晰:
 
 foo.js:
 
@@ -307,26 +267,19 @@ console.log(foo(5));
 
 ## bundling for the browser
 
-To run a module in node, you've got to start from somewhere.
-
-In node you pass a file to the `node` command to run a file:
-
+在node中运行一个模块, 你需要从某一处开始, 向 `node` 命令传递一个file参数来运行file.
 ```
 $ node robot.js
 beep boop
 ```
 
-In browserify, you do this same thing, but instead of running the file, you
-generate a stream of concatenated javascript files on stdout that you can write
-to a file with the `>` operator:
-
+在browserify中, 做法是一样的, 只不过是生成一个拼接了所有需要的JavaScript文件的导向标准输出的流, 可以使用 `>` 运算符
+写到文件中.
 ```
 $ browserify robot.js > bundle.js
 ```
 
-Now `bundle.js` contains all the javascript that `robot.js` needs to work.
-Just plop it into a single script tag in some html:
-
+现在 `bundle.js` 中包含 `robot.js` 运行所必须的javascript内容. 只需将其放到某个html的单个script块中即可:
 ``` html
 <html>
   <body>
