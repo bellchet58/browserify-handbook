@@ -1,29 +1,23 @@
-# introduction
+# 介绍
 
-This document covers how to use [browserify](http://browserify.org) to build
-modular applications.
+本文是substack/browserify-handbook 的简体中文翻译. 由magicdawn(magicdawn@qq.com)翻译.
+这篇文章介绍了如何使用[browserify](http://browserify.org)来构建模块化的应用.
 
 [![cc-by-3.0](http://i.creativecommons.org/l/by/3.0/80x15.png)](http://creativecommons.org/licenses/by/3.0/)
 
-browserify is a tool for compiling
-[node-flavored](http://nodejs.org/docs/latest/api/modules.html) commonjs modules
-for the browser.
+browserify是一个使用[node支持的CommonJS模块标准](http://nodejs.org/docs/latest/api/modules.html)
+来为浏览器编译模块.
 
-You can use browserify to organize your code and use third-party libraries even
-if you don't use [node](http://nodejs.org) itself in any other capacity except
-for bundling and installing packages with npm.
+你可以使用browserify来组织你的代码以及第三方库即使你只使用[node](http://nodejs.org)的npm来安装打包代码.
 
-The module system that browserify uses is the same as node, so
-packages published to [npm](https://npmjs.org) that were originally intended for
-use in node but not browsers will work just fine in the browser too.
+browserify所使用的模块系统跟node使用的是一致的, 那些发布到[npm](https://npmjs.org)上原本只想运行在node上
+的包也可以很好的运行在浏览器中.
 
-Increasingly, people are publishing modules to npm which are intentionally
-designed to work in both node and in the browser using browserify and many
-packages on npm are intended for use in just the browser.
-[npm is for all javascript](http://maxogden.com/node-packaged-modules.html),
-front or backend alike.
+慢慢地, 开发者们把node端以及通过browserify运行在浏览器端的代码发布到npm, npm上还有一些只运行在浏览器端的包.
+[npm is for all javascript](http://maxogden.com/node-packaged-modules.html),npm是JavaScript的包管理器, 
+不管是Frontend还是Backend.
 
-# table of contents
+# 目录
 
 - [introduction](#introduction)
 - [table of contents](#table-of-contents)
@@ -103,34 +97,31 @@ front or backend alike.
 
 # node packaged manuscript
 
-You can install this handbook with npm, appropriately enough. Just do:
-
+你可以通过npm安装这本handbook, 很恰当. 只需要键入:
 ```
-npm install -g browserify-handbook
+# 简体中文翻译
+npm install browserify-handbook-zhcn
+
+# english version
+npm install browserify-handbook
 ```
 
-Now you will have a `browserify-handbook` command that will open this readme
-file in your `$PAGER`. Otherwise, you may continue reading this document as you
-are presently doing.
+现在你可以使用 `browserify-handbook` 命令使用`$PAGER` 环境变量指定的阅读器打开这份README文件.
+当然你也可以继续阅读, 就像你现在这样.
 
 # node packaged modules
 
-Before we can dive too deeply into how to use browserify and how it works, it is
-important to first understand how the
-[node-flavored version](http://nodejs.org/docs/latest/api/modules.html)
-of the commonjs module system works.
+在我们深入如何使用browserify以及它是如何工作的, 了解nodejs支持的commonjs 模块系统如何工作十分重要.
 
 ## require
 
-In node, there is a `require()` function for loading code from other files.
-
-If you install a module with [npm](https://npmjs.org):
+在node中, 有一个`require()` 函数可以从其他文件中加载代码, 如果你使用npm来安装一个模块:
 
 ```
 npm install uniq
 ```
 
-Then in a file `nums.js` we can `require('uniq')`:
+然后有一个叫 `nums.js` 的文件, 我们可以 `require('uniq')`:
 
 ```
 var uniq = require('uniq');
@@ -138,77 +129,62 @@ var nums = [ 5, 2, 1, 3, 2, 5, 4, 2, 0, 1 ];
 console.log(uniq(nums));
 ```
 
-The output of this program when run with node is:
-
+使用node运行这个小程序的输出是:
 ```
 $ node nums.js
 [ 0, 1, 2, 3, 4, 5 ]
 ```
 
-You can require relative files by requiring a string that starts with a `.`. For
-example, to load a file `foo.js` from `main.js`, in `main.js` you can do:
-
+你可以通过给require函数传一个以 `.` 开头的string来require其他相对路径的文件.
+例如, 要从 `main.js` 加载 `foo.js`, 在 `main.js` 中你可以:
 ``` js
 var foo = require('./foo.js');
 console.log(foo(4));
 ```
-
-If `foo.js` was in the parent directory, you could use `../foo.js` instead:
-
+如果 `foo.js` 是在父文件夹, 你可以使用 `../foo.js` 代替:
 ``` js
 var foo = require('../foo.js');
 console.log(foo(4));
 ```
 
-or likewise for any other kind of relative path. Relative paths are always
-resolved with respect to the invoking file's location.
+同样, 对于其他类型的相对路径, 相对路径总是以调用require函数的那个文件的位置来寻找.
 
-Note that `require()` returned a function and we assigned that return value to a
-variable called `uniq`. We could have picked any other name and it would have
-worked the same. `require()` returns the exports of the module name that you
-specify.
+注意 `require()` 返回了一个function, 然后我们把它赋值给了 `uniq` 变量. 我们可以另取一个名字, 也可以正常工作. 
+`require()` 返回的是你指定的模块的导出值(exports).
 
-How `require()` works is unlike many other module systems where imports are akin
-to statements that expose themselves as globals or file-local lexicals with
-names declared in the module itself outside of your control. Under the node
-style of code import with `require()`, someone reading your program can easily
-tell where each piece of functionality came from. This approach scales much
-better as the number of modules in an application grows.
+`require()` 的工作方式不同于其他很多的模块系统, 其他很多模块系统的 imports 是类似于将名称暴露在全局空间或者
+本地文件作用域的语句, 其中用到的名称不是模块使用者能够控制的. 
+
+在node下通过 `require()` 方式导入的代码, 别人阅读你的程序的源代码的时候可以轻易的知道每一段代码或者某一个函数从
+哪里来. 当应用中的模块数量多起来后这种方式可伸缩性更好. 
 
 ## exports
 
-To export a single thing from a file so that other files may import it, assign
-over the value at `module.exports`:
-
+从一个文件导出只导出一个东西, 别的模块可以导入它, 将要导出的东西赋值给 `module.exports` :
 ``` js
 module.exports = function (n) {
     return n * 111
 };
 ```
-
-Now when some module `main.js` loads your `foo.js`, the return value of
-`require('./foo.js')` will be the exported function:
-
+现在如果某个模块 `main.js` 需要加载你的 `foo.js` , `require('./foo.js')` 的返回值会是刚导出的function:
 ``` js
 var foo = require('./foo.js');
 console.log(foo(5));
 ```
 
-This program will print:
+程序将会输出:
 
 ```
 555
 ```
 
-You can export any kind of value with `module.exports`, not just functions.
-
-For example, this is perfectly fine:
-
+你可以通过 `module.exports` 导出任何类型的值, 不只是function类型.
+例如, 下面这个例子也是极好的:
 ``` js
 module.exports = 555
 ```
 
-and so is this:
+下面这样也是:
 
 ``` js
 var numbers = [];
@@ -216,66 +192,51 @@ for (var i = 0; i < 100; i++) numbers.push(i);
 
 module.exports = numbers;
 ```
-
-There is another form of doing exports specifically for exporting items onto an
-object. Here, `exports` is used instead of `module.exports`:
-
+还有另一种导出的方法, 通过object导出. 在这里使用 `exports` 来代替 `module.exports` :
 ``` js
 exports.beep = function (n) { return n * 1000 }
 exports.boop = 555
 ```
 
-This program is the same as:
+上面的程序与下面是相同的:
 
 ``` js
 module.exports.beep = function (n) { return n * 1000 }
 module.exports.boop = 555
 ```
+因为 `module.exports` 与 `exports` 是相同的, 被初始化为一个空的object.
 
-because `module.exports` is the same as `exports` and is initially set to an
-empty object.
-
-Note however that you can't do:
+注意你不能这样做:
 
 ``` js
 // this doesn't work
 exports = function (n) { return n * 1000 }
 ```
 
-because the export value lives on the `module` object, and so assigning a new
-value for `exports` instead of `module.exports` masks the original reference. 
-
-Instead if you are going to export a single item, always do:
-
+因为导出值是附加在 `module` 对象上的, 所以为 `exports` 赋一个新值而不是 `module.exports` 会掩盖初始的引用.
+如果你是要导出一个单项, 总是使用 `module.exports` :
 ``` js
 // instead
 module.exports = function (n) { return n * 1000 }
 ```
-
-If you're still confused, try to understand how modules work in
-the background:
-
+如果你仍然很困惑, 可以尝试理解下模块系统是如何工作的:
 ``` js
 var module = {
   exports: {}
 };
 
-// If you require a module, it's basically wrapped in a function
+// 如果你requore一个module, 模块系统会简单的将文件包装一层function
 (function(module, exports) {
   exports = function (n) { return n * 1000 };
 }(module, module.exports))
 
-console.log(module.exports); // it's still an empty object :(
+console.log(module.exports); // 现在module.exports仍然还是空的object 
 ```
+通常情况下, 你会使用 `module.exports` 来导出单个function 或者 构造器, 因为一个模块只做一件事通常来说是最好的做法.
+`exports` 一开始是最主要的导出方式, `module.exports`是替补的, 但是 `module.exports` 被证明更加实用, 有用, 因为
+其直接, 清晰, 防止冗余.
 
-Most of the time, you will want to export a single function or constructor with
-`module.exports` because it's usually best for a module to do one thing.
-
-The `exports` feature was originally the primary way of exporting functionality
-and `module.exports` was an afterthought, but `module.exports` proved to be much
-more useful in practice at being more direct, clear, and avoiding duplication.
-
-In the early days, this style used to be much more common:
+在早期的时候,下面这种方式更通用:
 
 foo.js:
 
@@ -290,8 +251,7 @@ var foo = require('./foo.js');
 console.log(foo.foo(5));
 ```
 
-but note that the `foo.foo` is a bit superfluous. Using `module.exports` it
-becomes more clear:
+但是请注意 `foo.foo` 有点多余, 使用 `module.exports` 变得更加清晰:
 
 foo.js:
 
@@ -308,26 +268,19 @@ console.log(foo(5));
 
 ## bundling for the browser
 
-To run a module in node, you've got to start from somewhere.
-
-In node you pass a file to the `node` command to run a file:
-
+在node中运行一个模块, 你需要从某一处开始, 向 `node` 命令传递一个file参数来运行file.
 ```
 $ node robot.js
 beep boop
 ```
 
-In browserify, you do this same thing, but instead of running the file, you
-generate a stream of concatenated javascript files on stdout that you can write
-to a file with the `>` operator:
-
+在browserify中, 做法是一样的, 只不过是生成一个拼接了所有需要的JavaScript文件的导向标准输出的流, 可以使用 `>` 运算符
+写到文件中.
 ```
 $ browserify robot.js > bundle.js
 ```
 
-Now `bundle.js` contains all the javascript that `robot.js` needs to work.
-Just plop it into a single script tag in some html:
-
+现在 `bundle.js` 中包含 `robot.js` 运行所必须的javascript内容. 只需将其放到某个html的单个script块中即可:
 ``` html
 <html>
   <body>
@@ -335,63 +288,44 @@ Just plop it into a single script tag in some html:
   </body>
 </html>
 ```
-
-Bonus: if you put your script tag right before the `</body>`, you can use all of
-the dom elements on the page without waiting for a dom onready event.
-
-There are many more things you can do with bundling. Check out the bundling
-section elsewhere in this document.
+小提示: 将script标签放在`</body>`之前,script 可以使用所有的dom元素,而不必等待onready事件。
+bundling构建过程大有可为,请查看 bundling 部分。
 
 ## how browserify works
 
-Browserify starts at the entry point files that you give it and searches for any
-`require()` calls it finds using
-[static analysis](http://npmjs.org/package/detective)
-of the source code's
-[abstract syntax tree](https://en.wikipedia.org/wiki/Abstract_syntax_tree).
+Browserify从指定的entry文件开始, 搜寻所有的 `require()` 调用, 通过[静态分析](http://npmjs.org/package/detective)源代码的
+[AST](https://en.wikipedia.org/wiki/Abstract_syntax_tree)树.
 
-For every `require()` call with a string in it, browserify resolves those module
-strings to file paths and then searches those file paths for `require()` calls
-recursively until the entire dependency graph is visited.
+对于每个 `require(string module)` 调用, browserify 将被require的string转变为文件路径, 然后在这些文件中再次搜寻 `require()` 调用,
+直到所有的依赖都被访问到了.
 
-Each file is concatenated into a single javascript file with a minimal
-`require()` definition that maps the statically-resolved names to internal IDs.
+所有被访问到的文件被拼接成单个javascript文件, 带有一个最轻便的 `require()` 定义, 能够将静态分析得到的结果与拼接文件中的id相对应.
 
-This means that the bundle you generate is completely self-contained and has
-everything your application needs to work with a pretty negligible overhead.
+这意味着你生成的bundle文件完全是自包含的, 包含应用运行所需的所有代码, 只增加了一点微不足道的开销(指前面的require定义).
 
-For more details about how browserify works, check out the compiler pipeline
-section of this document.
+如需了解更多关于browserify的运行原理, 请查看 编译器流程线(compiler pipeline)部分.
 
 ## how node_modules works
 
-node has a clever algorithm for resolving modules that is unique among rival
-platforms.
+node有一个不同于其他平台的机智的模块查找算法, node的查找机制默认是基于本地文件的, 而不是基于一个包含查找路径的数组, 例如
+命令行工具中的 `$PATH` 环境变量那样.
 
-Instead of resolving packages from an array of system search paths like how
-`$PATH` works on the command line, node's mechanism is local by default.
+如果你从 `/beep/boop/bar.js` 进行 `require('./foo.js')` , node将会寻找 `/beep/boop/foo.js` 文件, 
+以 `./` 或者 `../` 开头的路径总是以调用 `require()` 的文件为基准开始寻找.
 
-If you `require('./foo.js')` from `/beep/boop/bar.js`, node will
-look for `./foo.js` in `/beep/boop/foo.js`. Paths that start with a `./` or
-`../` are always local to the file that calls `require()`.
-
-If however you require a non-relative name such as `require('xyz')` from
-`/beep/boop/foo.js`, node searches these paths in order, stopping at the first
-match and raising an error if nothing is found:
-
+但是如果你require一个非相对路径的模块名例如 `require('xyz')` 从 `/beep/boop/foo.js`, node
+会按照先后顺序搜索下面的路径, 从第一个匹配停止, 没匹配项则报错误.
 ```
 /beep/boop/node_modules/xyz
 /beep/node_modules/xyz
 /node_modules/xyz
 ```
 
-For each `xyz` directory that exists, node will first look for a
-`xyz/package.json` to see if a `"main"` field exists. The `"main"` field defines
-which file should take charge if you `require()` the directory path.
+对于每一个 `xyz` 文件夹, 如果存在, node将会首先查看 `xyz/package.json` 文件的 `main` 域是否存在. 
+`main` 域定义了 `require()` 文件夹时该加载哪一个文件.
 
-For example, if `/beep/node_modules/xyz` is the first match and
-`/beep/node_modules/xyz/package.json` has:
-
+例如, 如果 `/beep/node_modules/xyz` 是第一个匹配项, 而且`/beep/node_modules/xyz/package.json`
+包含了:
 ```
 {
   "name": "xyz",
@@ -400,38 +334,30 @@ For example, if `/beep/node_modules/xyz` is the first match and
 }
 ```
 
-then the exports from `/beep/node_modules/xyz/lib/abc.js` will be returned by
-`require('xyz')`.
-
-If there is no `package.json` or no `"main"` field, `index.js` is assumed:
+那么 `/beep/node_modules/xyz/lib/abc.js` 文件的exports值就是 `require('xyz')` 的返回值.
+如果 `package.json` 文件不存在, 或者 `main` 域不存在, 会采用默认值 `index.js` .
 
 ```
 /beep/node_modules/xyz/index.js
 ```
 
-If you need to, you can reach into a package to pick out a particular file. For
-example, to load the `lib/clone.js` file from the `dat` package, just do:
-
+如果有必要, 你可以深入到一个package内部去加载某一个文件.
+例如要加载 `dat` 这个包的 `lib/clone.js` 文件, 可以:
 ```
 var clone = require('dat/lib/clone.js')
 ```
 
-The recursive node_modules resolution will find the first `dat` package up the
-directory hierarchy, then the `lib/clone.js` file will be resolved from there.
-This `require('dat/lib/clone.js')` approach will work from any location where
-you can `require('dat')`.
+递归的node_modules机制将会顺着文件夹层级向上找到第一个 `dat` 包, 然后从该位置找 `lib/clone.js` .
+这种方法可以在任何可以使用 `require*('dat')` 的地方使用.
 
-node also has a mechanism for searching an array of paths, but this mechanism is
-deprecated and you should be using `node_modules/` unless you have a very good
-reason not to.
+node同样包含一个搜寻路径数组的机智, 但是这种机智已经被废弃, 你应该使用 `node_modules` 除非
+你有很好的理由不去使用它.
 
-The great thing about node's algorithm and how npm installs packages is that you
-can never have a version conflict, unlike most every other platform. npm
-installs the dependencies of each package into `node_modules`.
+node模块查找算法以及npm安装的模块的好处在于, 你永远不会碰到版本冲突的情况, 不同于其他所有的平台, npm
+会将每个模块自己的依赖安装到模块内部的你的_modules文件夹.
 
-Each library gets its own local `node_modules/` directory where its dependencies
-are stored and each dependency's dependencies has its own `node_modules/`
-directory, recursively all the way down.
+每一个包都有自己的本地_modules文件夹, 包含了此包的所有依赖, 而且这些依赖的依赖也有自己的node_modules文件夹,
+递归向下(recursively all the way down).
 
 This means that packages can successfully use different versions of libraries in
 the same application, which greatly decreases the coordination overhead
@@ -445,33 +371,19 @@ You can leverage how `node_modules/` works to organize your own local
 application modules too. See the `avoiding ../../../../../../..` section for
 more.
 
-## why concatenate
+## 为什么使用合并文件的方式
 
-Browserify is a build step that runs on the server. It generates a single bundle
-file that has everything in it.
-
-Here are some other ways of implementing module systems for the browser and what
-their strengths and weaknesses are:
+Browserify 是运行在server端的build过程。它会生产一个包含所有依赖的单文件bundle。
+下面列举了module system的其他实现方式，以及他们的优缺点。
 
 ### window globals
 
-Instead of a module system, each file defines properties on the window global
-object or develops an internal namespacing scheme.
+每个js文件在window host 对象上定义一个全局变量 或者 自行组织一个namespace的形式。
+这种方式因为每个文件都需要一个script 标签,不能scale up,大规模应用,而且script标签的顺序很重要.
+重构或维护这种方式构成的应用很困难,但是所有的浏览器都原生支持这种方式.不需要其他的server 端红菊的参与.
+每个script标签的http request导致应用很慢.
 
-This approach does not scale well without extreme diligence since each new file
-needs an additional `<script>` tag in all of the html pages where the
-application will be rendered. Further, the files tend to be very order-sensitive
-because some files need to be included before other files the expect globals to
-already be present in the environment.
-
-It can be difficult to refactor or maintain applications built this way.
-On the plus side, all browsers natively support this approach and no server-side
-tooling is required.
-
-This approach tends to be very slow since each `<script>` tag initiates a
-new round-trip http request.
-
-### concatenate
+### 拼接
 
 Instead of window globals, all the scripts are concatenated beforehand on the
 server. The code is still order-sensitive and difficult to maintain, but loads
@@ -511,46 +423,32 @@ asynchronous feature of AMD.
 
 ### bundling commonjs server-side
 
-If you're going to have a build step for performance and a sugar syntax for
-convenience, why not scrap the whole AMD business altogether and bundle
-commonjs? With tooling you can resolve modules to address order-sensitivity and
-your development and production environments will be much more similar and less
-fragile. The CJS syntax is nicer and the ecosystem is exploding because of node
-and npm.
+反正都是要在Server端build下,为什么不废弃掉整个AMD代码 , 用 build CommonJS 代替.
+在工具的帮助下,你可以解析模块的依赖顺序以及开发环境生产环境更加一致 , 以及更加健壮. 
+CommonJS的语法更加方便 , 更因node.js & npm 导致cjs的生态系统的爆发.
 
-You can seamlessly share code between node and the browser. You just need a
-build step and some tooling for source maps and auto-rebuilding.
+你可以再node & browser之间无缝的分享代码. 只需要一个build步骤以及生成source maps和自定重新rebuild的工具.
 
-Plus, we can use node's module lookup algorithms to save us from version
-mismatch insanity so that we can have multiple conflicting versions of different
-required packages in the same application and everything will still work. To
-save bytes down the wire you can dedupe, which is covered elsewhere in this
-document.
+而且 , 我们可以使用node的模块查找方法来防止模块版本不一致的问题 , 我们可以在同一个app里面使用同一个lib的不同版本 , 
+应用还可以工作. 为了节省空间 , 可以使用 depupe , 就是npm depupe , 详见 https://docs.npmjs.com/cli/dedupe.
 
 # development
 
-Concatenation has some downsides, but these can be very adequately addressed
-with development tooling.
+基于拼接模式会有一些缺点 , 但是这些问题都可以用响应的工具解决.
 
 ## source maps
 
-Browserify supports a `--debug`/`-d` flag and `opts.debug` parameter to enable
-source maps. Source maps tell the browser to convert line and column offsets for
-exceptions thrown in the bundle file back into the offsets and filenames of the
-original sources.
+Browserify 支持一个 `--debug`/`-d` 选项以及 `opts.debug` 参数来开启source maps支持.
+Source maps 告诉浏览器如何转换代码的行和列以得到build之前的源代码. 
 
-The source maps include all the original file contents inline so that you can
-simply put the bundle file on a web server and not need to ensure that all the
-original source contents are accessible from the web server with paths set up
-correctly.
+Source maps 包含所有的原始代码,所以你可以简单的把bundle 文件放在服务器上而不必确认所有的原始文件
+都放在正确的相应位置.
 
 ### exorcist
 
-The downside of inlining all the source files into the inline source map is that
-the bundle is twice as large. This is fine for debugging locally but not
-practical for shipping source maps to production. However, you can use
-[exorcist](https://npmjs.org/package/exorcist) to pull the inline source map out
-into a separate `bundle.map.js` file:
+将source maps 放在build之后的bundle里的缺点就是 build的文件是原来的两杯大. 本地测试是没什么问题的, 但是不适合将source maps
+inline到生产环境. 然而可以使用[exorcist](https://npmjs.org/package/exorcist) 将source maps放到独立的文件中,如
+`bundle.map.js`. 
 
 ``` sh
 browserify main.js --debug | exorcist bundle.js.map > bundle.js
@@ -1193,7 +1091,7 @@ utility fiefdom.
 
 # organizing modules
 
-## avoiding ../../../../../../..
+## 避免 ../../../../../../..
 
 Not everything in an application properly belongs on the public npm and the
 overhead of setting up a private npm or git repo is still rather large in many
