@@ -359,17 +359,11 @@ node模块查找算法以及npm安装的模块的好处在于, 你永远不会�
 每一个包都有自己的本地_modules文件夹, 包含了此包的所有依赖, 而且这些依赖的依赖也有自己的node_modules文件夹,
 递归向下(recursively all the way down).
 
-This means that packages can successfully use different versions of libraries in
-the same application, which greatly decreases the coordination overhead
-necessary to iterate on APIs. This feature is very important for an ecosystem
-like npm where there is no central authority to manage how packages are
-published and organized. Everyone may simply publish as they see fit and not
-worry about how their dependency version choices might impact other dependencies
-included in the same application.
+这意味着你可以在一个应用中使用同一个库的不同版本, 大大降低了迭代API时需要的协调开销. 这种特性对于像npm这样没有对
+包的发布, 组织进行鉴定授权的生态系统非常重要. 每个人都可以简单的按照自己喜欢发布他们的包, 而不必担心他们选择的
+版本可能影响同一个应用下其他的依赖.
 
-You can leverage how `node_modules/` works to organize your own local
-application modules too. See the `avoiding ../../../../../../..` section for
-more.
+你可以看到 `node_modules` 是如何在你本地的应用中工作的. 请查看 `avoiding ../../../../../../..`部分了解更多.
 
 ## 为什么使用合并文件的方式
 
@@ -385,47 +379,37 @@ Browserify 是运行在server端的build过程。它会生产一个包含所有�
 
 ### 拼接
 
-Instead of window globals, all the scripts are concatenated beforehand on the
-server. The code is still order-sensitive and difficult to maintain, but loads
-much faster because only a single http request for a single `<script>` tag needs
-to execute.
+将所有的脚本在server端被拼接在一起, 而不是使用window全局变量, 代码仍然是顺序敏感的, 而且难以维护, 
+但是加载的更快了, 因为只有一个 `<script>` 标记, 只需要一次HTTP请求.
 
-Without source maps, exceptions thrown will have offsets that can't be easily
-mapped back to their original files.
+没有source maps, 抛出的异常有偏移(?), 难以找到对应的源文件. 
 
 ### AMD
 
-Instead of using `<script>` tags, every file is wrapped with a `define()`
-function and callback. [This is AMD](http://requirejs.org/docs/whyamd.html). 
-
-The first argument is an array of modules to load that maps to each argument
-supplied to the callback. Once all the modules are loaded, the callback fires.
-
+每一个文件都被包装了一层 `define()` 函数以及一个callback回调, 
+[这就是AMD](http://requirejs.org/docs/whyamd.html), 而不是使用 `<script>` 标记.
 ``` js
 define(['jquery'] , function ($) {
     return function () {};
 });
 ```
 
-You can give your module a name in the first argument so that other modules can
-include it.
-
+你可以给你的模块命名, 以第一个参数传过去, 这样别的模块就可以加载它. 
 There is a commonjs sugar syntax that stringifies each callback and scans it for
 `require()` calls
 [with a regexp](https://github.com/jrburke/requirejs/blob/master/require.js#L17).
 
-Code written this way is much less order-sensitive than concatenation or globals
-since the order is resolved by explicit dependency information.
+这种方式写的代码, 比拼接模式或者使用全局变量模式在顺序敏感性方面要小, 因为加载顺序
+是通过解析显示指定的依赖信息得出.
 
-For performance reasons, most of the time AMD is bundled server-side into a
-single file and during development it is more common to actually use the
-asynchronous feature of AMD.
+为了性能原因, 大多数情况下AMD也需要在server端打包成一个单文件, 而在开发过程中, 使用AMD的异步特性更常见.
 
 ### bundling commonjs server-side
 
-反正都是要在Server端build下,为什么不废弃掉整个AMD代码 , 用 build CommonJS 代替.
-在工具的帮助下,你可以解析模块的依赖顺序以及开发环境生产环境更加一致 , 以及更加健壮. 
-CommonJS的语法更加方便 , 更因node.js & npm 导致cjs的生态系统的爆发.
+如果你为了性能原因以及语法糖的便利要在server端有一个构建过程, 
+为什么不废弃(原文 scrap)整个AMD业务, 使用commonjs打包?
+在工具的帮助下,你可以解决模块的依赖顺序敏感的问题, 以及开发环境生产环境更加一致, 以及更加健壮. 
+CommonJS的语法更加方便, 又有node 和 npm导致commonjs的生态系统爆发.
 
 你可以再node & browser之间无缝的分享代码. 只需要一个build步骤以及生成source maps和自定重新rebuild的工具.
 
@@ -456,10 +440,8 @@ browserify main.js --debug | exorcist bundle.js.map > bundle.js
 
 ## auto-recompile
 
-Running a command to recompile your bundle every time can be slow and tedious.
-Luckily there are many tools to solve this problem. Some of these tools support
-live-reloading to various degrees and others have a more traditional manual
-refresh cycle.
+每次运行一条命令去重新打包会很慢, 以及乏味. 幸运的是有许多的工具可以解决这个问题, 其中某些支持
+不同程度的热更新(live-reloading), 其他的则是传统的手动刷新机制.
 
 These are just a few of the tools you can use, but there are many more on npm!
 There are many different tools here that encompass many different tradeoffs and
