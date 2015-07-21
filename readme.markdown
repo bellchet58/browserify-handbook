@@ -443,7 +443,7 @@ browserify main.js --debug | exorcist bundle.js.map > bundle.js
 每次运行一条命令去重新打包会很慢, 以及乏味. 幸运的是有许多的工具可以解决这个问题, 其中某些支持
 不同程度的热更新(live-reloading), 其他的则是传统的手动刷新机制.
 
-These are just a few of the tools you can use, but there are many more on npm!
+这里有一堆可以使用的工具, 但是npm上有更多可用的工具. 
 There are many different tools here that encompass many different tradeoffs and
 development styles. It can be a little bit more work up-front to find the tools
 that responate most strongly with your own personal expectations and experience,
@@ -612,11 +612,9 @@ To enable LiveReload and have the browser refresh on JS/HTML/CSS changes, you ca
 budo app.js --live
 ```
 
-## using the api directly
+## 直接使用browserify的API
 
-You can just use the API directly from an ordinary `http.createServer()` for
-development too:
-
+你可以直接使用browserify的API和传统的 `http.createServer()` 的形式进行开发.
 ``` js
 var browserify = require('browserify');
 var http = require('http');
@@ -649,11 +647,9 @@ Here is a guide on how to [make browserify builds fast with watchify using
 gulp](https://github.com/gulpjs/gulp/blob/master/docs/recipes/fast-browserify-builds-with-watchify.md)
 from the official gulp recipes.
 
-# builtins
+# 内置的包
 
-In order to make more npm modules originally written for node work in the
-browser, browserify provides many browser-specific implementations of node core
-libraries:
+为了使更多原本在node上使用的模块能在浏览器端工作, browserify提供了许多node核心模块的浏览器版本的实现:
 
 * [assert](https://npmjs.org/package/assert)
 * [buffer](https://npmjs.org/package/buffer)
@@ -677,23 +673,23 @@ libraries:
 * [vm](https://npmjs.org/package/vm-browserify)
 * [zlib](https://npmjs.org/package/browserify-zlib)
 
-events, stream, url, path, and querystring are particularly useful in a browser
-environment.
 
-Additionally, if browserify detects the use of `Buffer`, `process`, `global`,
-`__filename`, or `__dirname`, it will include a browser-appropriate definition.
+events, stream, url, path, 以及 querystring 在浏览器环境下特别有用.
 
-So even if a module does a lot of buffer and stream operations, it will probably
-just work in the browser, so long as it doesn't do any server IO.
+另外, 如果浏览器侦测到了 `Buffer`, `process`, `global`,`__filename`, 或者 `__dirname`的使用, browserify会包含一个浏览器版本的实现.
 
-If you haven't done any node before, here are some examples of what each of
-those globals can do. Note too that these globals are only actually defined when
-you or some module you depend on uses them.
+这样如果一个有很多的buffer以及stream操作的模块, 在浏览器端也可以正常的工作, 只要不进行服务端的IO操作.
+
+如果, 你之前没有使用过node, 这里有一些例子展示了每一个global变量是干啥的. 注意这些全局变量只有在你要使用他们的时候, browserify才会包含这些实现.
 
 ## [Buffer](http://nodejs.org/docs/latest/api/buffer.html)
 
+在node端, 所有的文件和网络API都是使用Buffer块来传递数据. 在Browserify中, buffer API由[buffer](https://www.npmjs.org/package/buffer)模块提供. 它是使用Typed Array来实现, 对于旧的浏览器也有兼容处理.
+
+
+
 In node all the file and network APIs deal with Buffer chunks. In browserify the
-Buffer API is provided by [buffer](https://www.npmjs.org/package/buffer), which
+Buffer API is provided by , which
 uses augmented typed arrays in a very performant way with fallbacks for old
 browsers.
 
