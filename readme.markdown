@@ -746,28 +746,22 @@ third
 
 ## [global](http://nodejs.org/docs/latest/api/all.html#all_global)
 
-In node, `global` is the top-level scope where global variables are attached
-similar to how `window` works in the browser. In browserify, `global` is just an
-alias for the `window` object.
+Node中, `global` 是全局head变量, 全局变量附加在head变量上, 就像浏览器中window一样. 在browserify中, `global` 是 `window` 的别名.
 
 ## [__filename](http://nodejs.org/docs/latest/api/all.html#all_filename)
 
-`__filename` is the path to the current file, which is different for each file.
+`__filename` 是当前文件的路径, 每个文件各不相同. 为了防止泄露系统上的文件路径信息, 文件路径是以 传给 `browserify()` 的 `opts.basedir` 为root路径的, 默认为[当前工作路径](https://en.wikipedia.org/wiki/Current_working_directory) `process.cwd()`
 
-To prevent disclosing system path information, this path is rooted at the
-`opts.basedir` that you pass to `browserify()`, which defaults to the
-[current working directory](https://en.wikipedia.org/wiki/Current_working_directory).
-
-If we have a `main.js`:
-
+如, 我们这里有一个 `main.js` 文件
 ``` js
 var bar = require('./foo/bar.js');
 
 console.log('here in main.js, __filename is:', __filename);
+
 bar();
 ```
 
-and a `foo/bar.js`:
+以及一个 `foo/bar.js` 文件如下:
 
 ``` js
 module.exports = function () {
@@ -775,8 +769,7 @@ module.exports = function () {
 };
 ```
 
-then running browserify starting at `main.js` gives this output:
-
+然后browserify以 `main.js` 起始点, 输出如下:
 ```
 $ browserify main.js | node
 here in main.js, __filename is: /main.js
@@ -785,10 +778,9 @@ here in foo/bar.js, __filename is: /foo/bar.js
 
 ## [__dirname](http://nodejs.org/docs/latest/api/all.html#all_dirname)
 
-`__dirname` is the directory of the current file. Like `__filename`, `__dirname`
-is rooted at the `opts.basedir`.
+`__dirname` 代表的是当前文件所在的文件夹. 像 `__filename` 一样, `__dirname` 也是以 `opts.basedir` 为根文件夹的.
 
-Here's an example of how `__dirname` works:
+如下例子展示了 `__dirname` 是如何工作的:
 
 main.js:
 
@@ -803,7 +795,7 @@ x/y/z/abc.js:
 console.log('in abc.js, __dirname=' + __dirname);
 ```
 
-output:
+输出:
 
 ```
 $ browserify main.js | node
@@ -813,37 +805,26 @@ in main.js __dirname=/
 
 # transforms
 
-Instead of browserify baking in support for everything, it supports a flexible
-transform system that are used to convert source files in-place.
+browserify支持一个灵活的转换系统, 可以转化初始的源代码, 而不是使用browserify去支持所有的东西.
 
-This way you can `require()` files written in coffee script or templates and
-everything will be compiled down to javascript.
+在这种途径下, 你可以 `reuqire()` 使用coffee script语法编写的文件、模板文件、以及其他所有可以编译成JavaScript的文件.
 
-To use [coffeescript](http://coffeescript.org/) for example, you can use the
-[coffeeify](https://www.npmjs.org/package/coffeeify) transform.
-Make sure you've installed coffeeify first with `npm install coffeeify` then do:
-
+要使用 [coffeescript](http://coffeescript.org) , 你可以使用 [coffeeify](https://www.npmjs.org/package/coffeeify) 转换. 确保先使用 `npm i coffeeify` 安装 `coffify` 然后使用如下命令:
 ```
 $ browserify -t coffeeify main.coffee > bundle.js
 ```
 
-or with the API you can do:
-
+或者直接使用browserify API 可以这样:
 ```
 var b = browserify('main.coffee');
 b.transform('coffeeify');
 ```
 
-The best part is, if you have source maps enabled with `--debug` or
-`opts.debug`, the bundle.js will map exceptions back into the original coffee
-script source files. This is very handy for debugging with firebug or chrome
-inspector.
+最妙的地方在于, 如果你使用 `--debug` 或者 `opts.debug` 开启了source maps支持, 生成的bundle.js 文件会将发生的异常错误的地方对应回原始的coffee文件. 这对于使用 firebug 或者 chrome inspector 来调试很有用.
 
-## writing your own
+## 编写自己的转换
 
-Transforms implement a simple streaming interface. Here is a transform that
-replaces `$CWD` with the `process.cwd()`:
-
+转化器Transform 实现了一个简单的stram接口. 下面展示了一个简单的将 `$CWD` 转换为 `process.cwd()` 的转换器:
 ``` js
 var through = require('through2');
 
@@ -855,16 +836,12 @@ module.exports = function (file) {
 };
 ```
 
-The transform function fires for every `file` in the current package and returns
-a transform stream that performs the conversion. The stream is written to and by
-browserify with the original file contents and browserify reads from the stream
-to obtain the new contents.
 
-Simply save your transform to a file or make a package and then add it with
-`-t ./your_transform.js`.
+这个转换器函数在当前包的每个文件都调用一次, 而且反悔一个Transform stream去转换源代码. 这个流可以获取原始的源代码, 以及browserify从中获取转换后的内容.
 
-For more information about how streams work, check out the
-[stream handbook](https://github.com/substack/stream-handbook).
+只需简单的保存你的转换器至文件或者做成一个npm包, 然后使用 `-t ./your_transform.js` 使用.
+
+了解更多关于stream的内容, 请查阅 [stream-handbook](https://github.com/substack/stream-handbook).
 
 # package.json
 
