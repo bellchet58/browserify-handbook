@@ -438,34 +438,21 @@ inline到生产环境. 然而可以使用[exorcist](https://npmjs.org/package/ex
 browserify main.js --debug | exorcist bundle.js.map > bundle.js
 ```
 
-## auto-recompile
+## 自动打包
 
-每次运行一条命令去重新打包会很慢, 以及乏味. 幸运的是有许多的工具可以解决这个问题, 其中某些支持
-不同程度的热更新(live-reloading), 其他的则是传统的手动刷新机制.
+每次运行一条命令去重新打包会很慢, 以及乏味. 幸运的是有许多的工具可以解决这个问题, 其中某些支持不同程度的热更新(live-reloading), 其他的则是传统的手动刷新机制.
 
 这里有一堆可以使用的工具, 但是npm上有更多可用的工具. 
-There are many different tools here that encompass many different tradeoffs and
-development styles. It can be a little bit more work up-front to find the tools
-that responate most strongly with your own personal expectations and experience,
-but I think this diversity helps programmers to be more effective and provides
-more room for creativity and experimentation. I think diversity in tooling and a
-smaller browserify core is healthier in the medium to long term than picking a
-few "winners" by including them in browserify core (which creates all kinds of
-havoc in meaningful versioning and bitrot in core).
 
-That said, here are a few modules you might want to consider for setting up a
-browserify development workflow. But keep an eye out for other tools not (yet)
-on this list!
+这里介绍了许多不同的工具, 围绕着不同的利弊权衡以及开发方式. 找到最适合的你的期望以及经验的工具还需要你点点工作, 但是我认为这种分歧是能够帮助码农变得更高效, 以及提供更多创造、实验的空间. 我认为周边工具的多样化, 以及保持browserify核心最小在中长期策略中是比从挑选出一些更优秀的winners继承进browserify核心这种方式更加健康. 上述集成的方式会在有意义的版本中创建浩劫以及对核心的破坏.
+
+就是说, 这里有一些工具, 你可以以之建立起你的开发流程. 但是留个心眼, 还有许多其他的工具没有被列出!
 
 ### [watchify](https://npmjs.org/package/watchify)
 
-You can use `watchify` interchangeably with `browserify` but instead of writing
-to an output file once, watchify will write the bundle file and then watch all
-of the files in your dependency graph for changes. When you modify a file, the
-new bundle file will be written much more quickly than the first time because of
-aggressive caching.
+你可以使用 `watchify` 与 `browserify` 互换, 但是watchify不是只写入到输出文件一次, watchify会写入到输出文件, 然后监控你的依赖树中的所有文件改变. 当你修改一个文件时, 新的输出文件将会很快地被重新写入, 因为使用到了聚合缓存. 
 
-You can use `-v` to print a message every time a new bundle is written:
+你可以使用 `-v` 参数使每次写入新文件的时候打印一条信息:
 
 ```
 $ watchify browser.js -d -o static/bundle.js -v
@@ -477,8 +464,7 @@ $ watchify browser.js -d -o static/bundle.js -v
 610597 bytes written to static/bundle.js  0.19s
 ```
 
-Here is a handy configuration for using watchify and browserify with the
-package.json "scripts" field:
+这里有一个实用的配置代码片段, 当你使用package.json的fields字段来配置 browserify 和 watchify的使用:
 
 ``` json
 {
@@ -487,55 +473,42 @@ package.json "scripts" field:
 }
 ```
 
-To build the bundle for production do `npm run build` and to watch files for
-during development do `npm run watch`.
+使用 `npm run build` 来生成生产环境的文件, 使用 `npm run watch`来进行开发.
 
-[Learn more about `npm run`](http://substack.net/task_automation_with_npm_run).
+[了解更多 `npm run` 的使用](http://substack.net/task_automation_with_npm_run).
 
 ### [beefy](https://www.npmjs.org/package/beefy)
 
-If you would rather spin up a web server that automatically recompiles your code
-when you modify it, check out [beefy](http://didact.us/beefy/).
-
-Just give beefy an entry file:
+如果你更喜欢建立一个服务器来自动编译修改的文件, 查看 [beefy](http://didact.us/beefy/) 这个包.
+只需要给beefy一个入口文件
 
 ```
 beefy main.js
 ```
 
-and it will set up shop on an http port.
+然后他会建立在一个http端口上建立输出服务器.
 
 ### [wzrd](https://github.com/maxogden/wzrd)
 
-In a similar spirit to beefy but in a more minimal form is
-[wzrd](https://github.com/maxogden/wzrd).
+同beefy一样的理念, 但是形式更简洁 [wzrd](https://github.com/maxogden/wzrd)
 
-Just `npm install -g wzrd` then you can do:
+只需 `npm install -g wzrd` 然后你可以:
 
 ```
 wzrd app.js
 ```
 
-and open up http://localhost:9966 in your browser.
+然后打开 http://localhost:9966
 
 ### browserify-middleware, enchilada
 
-If you are using express, check out
-[browserify-middleware](https://www.npmjs.org/package/browserify-middleware)
-or [enchilada](https://www.npmjs.org/package/enchilada).
+若果你使用express, 请查看 [browserify-middleware](https://www.npmjs.org/package/browserify-middleware) 或者 [enchilada](https://www.npmjs.org/package/enchilada).
 
-They both provide middleware you can drop into an express application for
-serving browserify bundles.
+它们都提供了为express提供borswerify 生成服务的中间件.
 
 ### [livereactload](https://github.com/milankinen/livereactload)
 
-livereactload is a tool for [react](https://github.com/facebook/react)
-that automatically updates your web page state when you modify your code.
-
-livereactload is just an ordinary browserify transform that you can load with
-`-t livereactload`, but you should consult the
-[project readme](https://github.com/milankinen/livereactload#livereactload)
-for more information.
+livereactload 是一款为 [react](https://github.com/facebook/react) 提供当你更改代码时自动更新页面的工具. livereactload 是一个普通的transform,你可以使用 `-t livereactload` 加载它, 你应该查看该项目的说明文件 [project readme](https://github.com/milankinen/livereactload#livereactload) 了解更多.
 
 ### [browserify-hmr](https://github.com/AgentME/browserify-hmr)
 
@@ -590,24 +563,21 @@ files are re-executed instead of the whole bundle on each modification.
 
 ### [budo](https://github.com/mattdesl/budo)
 
-budo is a browserify development server with a stronger focus on incremental bundling and LiveReload integration (including CSS injection). 
+budo  提供一个browserify开发服务器, 主要提供增量更新以及LiveReload集成(也包括注入CSS).
 
-Install it like so:
-
+使用如下命令安装
 ```sh
 npm install budo -g
 ```
 
-And run it on your entry file:
-
+然后使用它运行你的entry文件:
 ```
 budo app.js
 ```
 
-This starts the server at [http://localhost:9966](http://localhost:9966) with a default `index.html`, incrementally bundling your source on filesave. The requests are delayed until the bundle has finished, so you won't be served stale or empty bundles if you refresh the page mid-update.
+这条命令在 http://localhost:9966 创建了一个服务器, 带有一个默认的 `index.html` 页面, 以及增量更新的功能. 这些请求是延迟的,直到生成文件结束, 所以你在页面更新过程中刷新会得到旧的或者空的生成文件.
 
-To enable LiveReload and have the browser refresh on JS/HTML/CSS changes, you can run it like so:
-
+使用 `--live` 来开启 LiveReload 功能:
 ```
 budo app.js --live
 ```
@@ -632,20 +602,14 @@ http.createServer(function (req, res) {
 
 ## grunt
 
-If you use grunt, you'll probably want to use the
-[grunt-browserify](https://www.npmjs.org/package/grunt-browserify) plugin.
+[grunt-browserify](https://www.npmjs.org/package/grunt-browserify) 插件.
 
 ## gulp
 
-If you use gulp, you should use the browserify API directly.
+如果你使用gulp构建, 你应该直接使用browserify API.
 
-Here is
-[a guide for getting started](http://viget.com/extend/gulp-browserify-starter-faq)
-with gulp and browserify.
-
-Here is a guide on how to [make browserify builds fast with watchify using
-gulp](https://github.com/gulpjs/gulp/blob/master/docs/recipes/fast-browserify-builds-with-watchify.md)
-from the official gulp recipes.
+[这里](http://viget.com/extend/gulp-browserify-starter-faq)提供了一个向导介绍在gulp中使用browserify.
+[这里](https://github.com/gulpjs/gulp/blob/master/docs/recipes/fast-browserify-builds-with-watchify.md)展示了如何在gulp使用watchify更快地构建browserify文件.
 
 # 内置的包
 
@@ -686,22 +650,14 @@ events, stream, url, path, 以及 querystring 在浏览器环境下特别有用.
 
 在node端, 所有的文件和网络API都是使用Buffer块来传递数据. 在Browserify中, buffer API由[buffer](https://www.npmjs.org/package/buffer)模块提供. 它是使用Typed Array来实现, 对于旧的浏览器也有兼容处理.
 
-
-
-In node all the file and network APIs deal with Buffer chunks. In browserify the
-Buffer API is provided by , which
-uses augmented typed arrays in a very performant way with fallbacks for old
-browsers.
-
-Here's an example of using `Buffer` to convert a base64 string to hex:
-
+下面这个例子展示了 "使用`Buffer`来转换一个base64格式string到hex格式":
 ```
 var buf = Buffer('YmVlcCBib29w', 'base64');
 var hex = buf.toString('hex');
 console.log(hex);
 ```
 
-This example will print:
+输出
 
 ```
 6265657020626f6f70
@@ -845,15 +801,10 @@ module.exports = function (file) {
 
 # package.json
 
-## browser field
+## browser 字段
+你可以在包中的 `package.json` 文件中定义一个 `browser` 字段, 这样可以让browserify将 `main` 字段覆盖掉, 或者覆盖其他单独的文件.
 
-You can define a `"browser"` field in the package.json of any package that will
-tell browserify to override lookups for the main field and for individual
-modules.
-
-If you have a module with a main entry point of `main.js` for node but have a
-browser-specific entry point at `browser.js`, you can do:
-
+如果你有一个有着 `main.js` 入口的模块, 但是对于浏览器有特定版本的 `browser.js` ,你可以这样做:
 ``` json
 {
   "name": "mypkg",
@@ -862,22 +813,9 @@ browser-specific entry point at `browser.js`, you can do:
   "browser": "browser.js"
 }
 ```
+现在, 当别人在node端 `reuqire('mypkg')` 的时候, 他们会得到 `main.js` 的exports值, 当他们使用browserify的时候, 他们会得到 `browser.js` 的exports值.
 
-Now when somebody does `require('mypkg')` in node, they will get the exports
-from `main.js`, but when they do `require('mypkg')` in a browser, they will get
-the exports from `browser.js`.
-
-Splitting up whether you are in the browser or not with a `"browser"` field in
-this way is greatly preferrable to checking whether you are in a browser at
-runtime because you may want to load different modules based on whether you are
-in node or the browser. If the `require()` calls for both node and the browser
-are in the same file, browserify's static analysis will include everything
-whether you use those files or not.
-
-You can do more with the "browser" field as an object instead of a string.
-
-For example, if you only want to swap out a single file in `lib/` with a
-browser-specific version, you could do:
+将node端与browser端用这种方式去分开来, 比在代码运行时去检测是在node端还是browser端而去加载不同的模块要好. 如果node和browser的 `require()` 调用的是同一个文件, browserify的静态分析将会包含所有的被require的module, 不管是否会起到作用. 你可以使用object类型而不是字符串作为 `browser` 字段的值. 例如, 如果你想替换掉 `lib/` 文件夹中的一个文件, 替换为浏览器版本的, 你可以这样做: 
 
 ``` json
 {
@@ -890,8 +828,7 @@ browser-specific version, you could do:
 }
 ```
 
-or if you want to swap out a module used locally in the package, you can do:
-
+再或者, 你想替换掉你的包中require的其他包, 你可以这样做:
 ``` json
 {
   "name": "mypkg",
@@ -903,9 +840,7 @@ or if you want to swap out a module used locally in the package, you can do:
 }
 ```
 
-You can ignore files (setting their contents to the empty object) by setting
-their values in the browser field to `false`:
-
+你可以忽略某些文件(设置他们的内容为空), 通过设置它们在browser字段中的值为 `false`:
 ``` json
 {
   "name": "mypkg",
@@ -916,21 +851,11 @@ their values in the browser field to `false`:
   }
 }
 ```
+设置的browser字段只作用域当前模块. 映射表不会向下作用于它的依赖包,或者向上作用雨依赖它的包. 这种孤立设计是为了防止模块之间的危害, 如此当你require一个模块的时候, 你不必担心它所带来的其他影响. 就像你不必担心你的本地配置会影响到在你的依赖树很深的模块.
 
-The browser field *only* applies to the current package. Any mappings you put
-will not propagate down to its dependencies or up to its dependents. This
-isolation is designed to protect modules from each other so that when you
-require a module you won't need to worry about any system-wide effects it might
-have. Likewise, you shouldn't need to wory about how your local configuration
-might adversely affect modules far away deep into your dependency graph.
+## browserify.transform 字段
 
-## browserify.transform field
-
-You can configure transforms to be automatically applied when a module is loaded
-in a package's `browserify.transform` field. For example, we can automatically
-apply the [brfs](https://npmjs.org/package/brfs) transform with this
-package.json:
-
+你可以在 `browserify.transform` 字段配置在模块加载的时候自动应用的转换器. 例如, 我们可以自动的应用[brfs](https://npmjs.org/package/brfs) 转化通过如下配置:
 ``` json
 {
   "name": "mypkg",
@@ -942,8 +867,7 @@ package.json:
 }
 ```
 
-Now in our `main.js` we can do:
-
+现在, 在我们的 `main.js` 中, 我们可以:
 ``` js
 var fs = require('fs');
 var src = fs.readFileSync(__dirname + '/foo.txt', 'utf8');
@@ -951,26 +875,21 @@ var src = fs.readFileSync(__dirname + '/foo.txt', 'utf8');
 module.exports = function (x) { return src.replace(x, 'zzz') };
 ```
 
-and the `fs.readFileSync()` call will be inlined by brfs without consumers of
-the module having to know. You can apply as many transforms as you like in the
-transform array and they will be applied in order.
+然后 `fs.readFileSync()` 调用的结果就会内联在代码中, 而不需要内容消费者(指接受fs.readFileSync结果的变量)感知. 你可以在转换器的数组中应用任意多的转化器, 他们会按照先后顺序应用. 
 
-Like the `"browser"` field, transforms configured in package.json will only
-apply to the local package for the same reasons.
+像 `browser` 字段一样, package.json中的`transforms`只应用于当前包, 为了同样的原因.
+### 配置转换器
 
-### configuring transforms
+有时候, 一个转换器可能需要配置选项. 可以使用下面的形式配置:
 
-Sometimes a transform takes configuration options on the command line. To apply these
-from package.json you can do the following.
-
-**on the command line**
+**命令行工具形式**
 ```
 browserify -t coffeeify \
            -t [ browserify-ngannotate --ext .coffee --bar ] \
            index.coffee > index.js
 ```
 
-**in package.json**
+**package.json 配置**
 ``` json
 "browserify": {
   "transform": [
@@ -1798,6 +1717,9 @@ To install coverify or covert as a devDependency, run
 `npm install -D coverify` or `npm install -D covert`.
 
 # bundling
+// TODO: 下次从这里开始
+
+这部分内容包含了
 
 This section covers bundling in more detail.
 
