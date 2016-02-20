@@ -1821,15 +1821,9 @@ b.ignore('foo')
 
 ### excluding
 
-Another related thing we might want is to completely remove a module from the
-output so that `require('modulename')` will fail at runtime. This is useful if
-we want to split things up into multiple bundles that will defer in a cascade to
-previously-defined `require()` definitions.
 另一种我们希望的相关情况是从输出中完全移除某一个模块, 然后 `require('modulename')`在
 运行时会失败. 这在我们项将代码打包成多个输出, 并形成级连至前面定义的 `require()` 定义中.
 
-For example, if we have a vendored standalone bundle for jquery that we don't want to appear in
-the primary bundle:
 例如, 如果我们有一个独立的 `jquery` 打包文件, 我们并不想它出现在主打包输出中.
 
 ```
@@ -1851,20 +1845,20 @@ $(window).click(function () { document.body.bgColor = 'red' });
 <script src="bundle.js"></script>
 ```
 
-and not have the jquery definition show up in `bundle.js`, then while compiling
-the `main.js`, you can `--exclude jquery`:
+已及在 `bundle.js` 中没有jquery的定义, 然后在编译 `main.js` 时, 可以 `--exclude jquery`
+
 
 ```
 browserify main.js --exclude jquery > bundle.js
 ```
 
-To exclude `foo` on the command-line do:
+通过命令行程序来排除 `foo`:
 
 ```
 browserify --exclude foo
 ```
 
-To exclude `foo` from the api with some bundle instance `b` do:
+通过api来排除 `foo`:
 
 ``` js
 b.exclude('foo')
