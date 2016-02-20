@@ -1763,19 +1763,15 @@ $ browserify foo.js --standalone foo.bar.baz > bundle.js
 
 ## ignoring and excluding
 
-In browserify parlance, "ignore" means: replace the definition of a module with
-an empty object. "exclude" means: remove a module completely from a dependency graph.
-对于browserify来说, "ignore" 忽略意味着: // 下次从这里开始
+对于browserify来说, 忽略(ignore) 意味着: 用一个空的对象代替那个模块定义. 排除(exclude) 
+意味着将一个模块从依赖图中完全移除.
 
-Another way to achieve many of the same goals as ignore and exclude is the
-"browser" field in package.json, which is covered elsewhere in this document.
+另外一种方法是使用 package.json 的 browser字段来实现ignore和exclude功能, 在本文中其他地方介绍了.
 
 ### ignoring
 
-Ignoring is an optimistic strategy designed to stub in an empty definition for
-node-specific modules that are only used in some codepaths. For example, if a
-module requires a library that only works in node but for a specific chunk of
-the code:
+忽略是一种为一些只在特定代码中工作的node模块提供空的定义而设计的积极策略. 例如, 
+一个模块依赖一个库, 这个库中一些代码只在node中能正常运行:
 
 ``` js
 var fs = require('fs');
@@ -1799,27 +1795,25 @@ exports.write = function (src, dst, cb) {
 };
 ```
 
-browserify already "ignores" the `'fs'` module by returning an empty object, but
-the `.write()` function here won't work in the browser without an extra step like
-a static analysis transform or a runtime storage fs abstraction.
+browserify 已经忽略了 `fs` 模块, 通过返回一个空的object, 但是上边代码中的 `.write()` 函数
+在浏览器中如果没有进一步的操作是不能正常工作的, 进一步操作例如静态分析转换代码或者提供一个
+fs模块抽象.
 
-However, if we really want the `convert()` function but don't want to see
-`mkdirp` in the final bundle, we can ignore mkdirp with `b.ignore('mkdirp')` or
-`browserify --ignore mkdirp`. The code will still work in the browser if we
-don't call `write()` because `require('mkdirp')` won't throw an exception, just
-return an empty object.
+然而, 如果我们真的需要 `convert()` 函数, 但是不希望 `mkdirp` 这个模块出现在最后打包好的文件中,
+我们可以忽略mkdirp这个模块, 通过 `b.ignore('mkdirp')` 或者 `browserify --ignore mkdirp`. 这份
+代码在浏览器中依然可以正差工作, 如果我们不取调用 `write()` 函数的话. 因为 `require('mkdirp')` 不会
+抛出异常, 只是返回值是一个空的object.
 
-Generally speaking it's not a good idea for modules that are primarily
-algorithmic (parsers, formatters) to do IO themselves but these tricks can let
-you use those modules in the browser anyway.
+通常来说一些让算法模块(类似parsers, formatters)自己进行IO操作不是一个好主意. 但是
+这个trick可以让你在浏览器中使用那些模块.
 
-To ignore `foo` on the command-line do:
+在命令行工具中忽略 `foo`:
 
 ```
 browserify --ignore foo
 ```
 
-To ignore `foo` from the api with some bundle instance `b` do:
+在api中忽略 `foo`, 同时有一个bundle实例 `b`:
 
 ``` js
 b.ignore('foo')
@@ -1831,23 +1825,26 @@ Another related thing we might want is to completely remove a module from the
 output so that `require('modulename')` will fail at runtime. This is useful if
 we want to split things up into multiple bundles that will defer in a cascade to
 previously-defined `require()` definitions.
+另一种我们希望的相关情况是从输出中完全移除某一个模块, 然后 `require('modulename')`在
+运行时会失败. 这在我们项将代码打包成多个输出, 并形成级连至前面定义的 `require()` 定义中.
 
 For example, if we have a vendored standalone bundle for jquery that we don't want to appear in
 the primary bundle:
+例如, 如果我们有一个独立的 `jquery` 打包文件, 我们并不想它出现在主打包输出中.
 
 ```
 $ npm install jquery
 $ browserify -r jquery --standalone jquery > jquery-bundle.js
 ```
 
-then we want to just `require('jquery')` in a `main.js`:
+然后我们只是在 `main.js` 中 `require('jquery')`:
 
 ``` js
 var $ = require('jquery');
 $(window).click(function () { document.body.bgColor = 'red' });
 ```
 
-defering to the jquery dist bundle so that we can write:
+延迟到前面的jquery打包, 我们可以这样写:
 
 ``` html
 <script src="jquery-bundle.js"></script>
