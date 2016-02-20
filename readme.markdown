@@ -1717,63 +1717,47 @@ To install coverify or covert as a devDependency, run
 `npm install -D coverify` or `npm install -D covert`.
 
 # bundling
-// TODO: 下次从这里开始
 
-这部分内容包含了
+这部分内容包含了更详细的打包内容。
 
-This section covers bundling in more detail.
-
-Bundling is the step where starting from the entry files, all the source files
-in the dependency graph are walked and packed into a single output file.
+打包是一个从入口文件(entry files), 遍历整个依赖图, 将所有的源文件整合至单个输出文件的过程.
 
 ## saving bytes
 
-One of the first things you'll want to tweak is how the files that npm installs
-are placed on disk to avoid duplicates.
+你最想修改的第一件事是通过npm安装到硬盘上的文件是如何避免重复的.
 
-When you do a clean install in a directory, npm will ordinarily factor out
-similar versions into the topmost directory where 2 modules share a dependency.
-However, as you install more packages, new packages will not be factored out
-automatically. You can however use the `npm dedupe` command to factor out
-packages for an already-installed set of packages in `node_modules/`. You could
-also remove `node_modules/` and install from scratch again if problems with
-duplicates persist.
+当你从一个空目录运行npm install, npm通常会找出两个module所共有的依赖, 并安装到最顶级的文件夹. 
+然而当你再次安装更多的包的时候, npm不会自动进行查找公共依赖操作. 你可以运行 `npm dedupe` 来
+手动进行这个操作. 你也可以删掉整个 `node_modules/` 目录, 然后重新安装, 如果依赖重复的问题还存在的话. 
 
-browserify will not include the same exact file twice, but compatible versions
-may differ slightly. browserify is also not version-aware, it will include the
-versions of packages exactly as they are laid out in `node_modules/` according
-to the `require()` algorithm that node uses.
+browserify不会多次包含同一个文件, 但是相互兼容的多个版本的清况有些不同. browserify并不能感知到版本, 它会
+包含 `node_modules/` 文件夹中的包, 对应着某个版本, 根据node使用的 `require()` 算法一致. 
 
-You can use the `browserify --list` and `browserify --deps` commands to further
-inspect which files are being included to scan for duplicates.
+你可以运行 `browserify --list` 和 `browserify --deps` 命令来查看哪些文件将会被包含进来, 来检查文件重复. 
 
 ## standalone
 
-You can generate UMD bundles with `--standalone` that will work in node, the
-browser with globals, and AMD environments.
+你可以使用 `--standalone` 选项来生成UMD模块, 可以在node、浏览器全局变量, 以及AMD环境中工作.
 
-Just add `--standalone NAME` to your bundle command:
-
+只需要向打包命令中添加 `--standalone NAME`:
 ```
 $ browserify foo.js --standalone xyz > bundle.js
 ```
 
-This command will export the contents of `foo.js` under the external module name
-`xyz`. If a module system is detected in the host environment, it will be used.
-Otherwise a window global named `xyz` will be exported.
+这条命令会将 `foo.js` 的内容导出在一个名为 `xyz` 的外部模块中. 如果在运行环境中检
+测到了一个模块加载系统, 就会使用这个模块系统. 否则将会绑定在 `window.xyz` 全局变量中.
 
-You can use dot-syntax to specify a namespace hierarchy:
+你可以使用点号语法(dot-syntax)来指定一个命名空间:
 
 ```
 $ browserify foo.js --standalone foo.bar.baz > bundle.js
 ```
 
-If there is already a `foo` or a `foo.bar` in the host environment in window
-global mode, browserify will attach its exports onto those objects. The AMD and
-`module.exports` modules will behave the same.
+如果在运行环境中已经存在 `foo` 或者 `foo.bar` 全局变量, browserify将会把这个模块的
+导出值绑定在那些全局变量上. 
 
-Note however that standalone only works with a single entry or directly-required
-file.
+注意独立模块只在单入口或者是直接required的文件的情况下使用
+
 
 ## external bundles
 
@@ -1781,6 +1765,7 @@ file.
 
 In browserify parlance, "ignore" means: replace the definition of a module with
 an empty object. "exclude" means: remove a module completely from a dependency graph.
+对于browserify来说, "ignore" 忽略意味着: // 下次从这里开始
 
 Another way to achieve many of the same goals as ignore and exclude is the
 "browser" field in package.json, which is covered elsewhere in this document.
