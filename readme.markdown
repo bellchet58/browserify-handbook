@@ -902,34 +902,37 @@ browserify -t coffeeify \
 
 # finding good modules
 
-Here are [some useful heuristics](http://substack.net/finding_modules)
+Here are [some useful heuristics]()
 for finding good modules on npm that work in the browser:
+这里有[一些提示](http://substack.net/finding_modules), 对于在npm上寻找在浏览器端
+工作的优秀模块:
 
 * I can install it with npm
-
 * code snippet on the readme using require() - from a quick glance I should see
 how to integrate the library into what I'm presently working on
-
 * has a very clear, narrow idea about scope and purpose
-
 * knows when to delegate to other libraries - doesn't try to do too many things itself
-
 * written or maintained by authors whose opinions about software scope,
 modularity, and interfaces I generally agree with (often a faster shortcut
 than reading the code/docs very closely)
-
 * inspecting which modules depend on the library I'm evaluating - this is baked
 into the package page for modules published to npm
 
-Other metrics like number of stars on github, project activity, or a slick
-landing page, are not as reliable.
+* 可以使用npm来安装这个模块
+* 项目说明(README)上的代码块在使用 `require` - 能够快速查看怎样集成到目前的工作中
+* 对于项目有明确的目的, 且轻量
+* 知道何时将控制权交给其他库 - 而不是尝试自己去做的更多
+* 作者或维护者在软件领域、模块化、接口等方面的观点自己比较赞同(通常这比读代码/文档更快)
+* 查看哪些模块依赖了正在被考察的这个包 - this is baked into the package page 
+for modules published to npm(什么意思? 真心不懂)
+
+其他标准类似github的star数量, 项目的更新活动, 或者一个一个有些的新手指南网页,
+不是那么的可靠.
 
 ## module philosophy
 
-People used to think that exporting a bunch of handy utility-style things would
-be the main way that programmers would consume code because that is the primary
-way of exporting and importing code on most other platforms and indeed still
-persists even on npm.
+人们常认为导出一系列方便的工具代码会是码农消耗代码的方式, 因为这是其他平台上码农
+导出和导入代码的方式, 而且持续存在, 甚至在npm上也是.
 
 However, this
 [kitchen-sink mentality](https://github.com/substack/node-mkdirp/issues/17)
