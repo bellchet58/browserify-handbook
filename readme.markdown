@@ -1920,59 +1920,52 @@ b.exclude('foo')
 大部分情况下, 默认的将一个或多个入口文件打包成单个输出是非常合适的, 特别是考虑到 
 将等待时间减少至一个http请求就获取到了所有的javascript资源.
 
-However, sometimes this initial penalty is too high for parts of a website that
-are rarely or never used by most visitors such as an admin panel.
-This partitioning can be accomplished with the technique covered in the
-[ignoring and excluding](#ignoring-and-excluding) section, but factoring out
-shared dependencies manually can be tedious for a large and fluid dependency
-graph.
+然而, 某些情况下这种打包方式不适合网站的某些大部分访问者很少或者从不访问的部分. 例如
+管理员工作台. 这种分离策略可以使用[忽略和排除](#ignoring-and-excluding)所提到的技术完成.
+但是为一个庞大且不确定的依赖图手动的分析剥离出共同的依赖是相当乏味的工作.
 
-Luckily, there are plugins that can automatically factor browserify output into
-separate bundle payloads.
+幸运的是, 这里有一些插件可以自动的分析browserify的输出至单独的文件中.
 
 ## factor-bundle
 
-[factor-bundle](https://www.npmjs.org/package/factor-bundle) splits browserify
-output into multiple bundle targets based on entry-point. For each entry-point,
-an entry-specific output file is built. Files that are needed by two or more of
-the entry files get factored out into a common bundle.
+[factor-bundle](https://www.npmjs.org/package/factor-bundle) 根据入口文件分割browserify输出至
+多个打包文件中. 对于每个入口, 一个入口相关的输出将会被创建. 被两个或多个入口所依赖的文件被
+剥离至一个公有的模块中. 
 
-For example, suppose we have 2 pages: /x and /y. Each page has an entry point,
-`x.js` for /x and `y.js` for /y.
+例如, 假设我们有两个网页: /x 和 /y. 对于每个网页都有一个入口, /x 的入口是 `x.js`, 
+/y 的入口是 `y.js`.
 
-We then generate page-specific bundles `bundle/x.js` and `bundle/y.js` with
-`bundle/common.js` containing the dependencies shared by both `x.js` and `y.js`:
+然后我们生成页面特定的打包文件 `bundle/x.js` 和 `bundle/y.js` 以及 `x.js` 和 `y.js`
+所共有的依赖组成的 `bundle/common.js`:
 
 ```
 browserify x.js y.js -p [ factor-bundle -o bundle/x.js -o bundle/y.js ] \
   -o bundle/common.js
 ```
 
-Now we can simply put 2 script tags on each page. On /x we would put:
+现在我们可以简单的在每个页面上防止两个script标签. 在 /x 上我们可以放置:
 
 ``` html
 <script src="/bundle/common.js"></script>
 <script src="/bundle/x.js"></script>
 ```
 
-and on page /y we would put:
+在 /y 上可以放置:
 
 ``` html
 <script src="/bundle/common.js"></script>
 <script src="/bundle/y.js"></script>
 ```
 
-You could also load the bundles asynchronously with ajax or by inserting a
-script tag into the page dynamically but factor-bundle only concerns itself with
-generating the bundles, not with loading them.
+你也可以加载通过ajax或者动态插入一个script标签来异步地加载打包好的文件. 但是 factor-nbundle
+插件只关心如何生成这些打包文件, 并不是如何加载他们.
 
 ## partition-bundle
 
-[partition-bundle](https://www.npmjs.org/package/partition-bundle) handles
-splitting output into multiple bundles like factor-bundle, but includes a
-built-in loader using a special `loadjs()` function.
+[partition-bundle](https://www.npmjs.org/package/partition-bundle) 也是分割输出至多个打包文件
+的. 同 factor-bundle 一致, 但是包含了一个内置的加载器 `loadjs()` 函数.
 
-partition-bundle takes a json file that maps source files to bundle files:
+partition-bundle 接受一个包含输入文件于打包输出之间的映射关系的json文件:
 
 ```
 {
@@ -1982,23 +1975,22 @@ partition-bundle takes a json file that maps source files to bundle files:
 }
 ```
 
-Then partition-bundle is loaded as a plugin and the mapping file, output
-directory, and destination url path (required for dynamic loading) are passed
-in:
+然后 partition-bundle 被加载为插件, 映射文件, 输出目录以及目标url(做动态加载时必须)被
+传入:
 
 ```
 browserify -p [ partition-bundle --map mapping.json \
   --output output/directory --url directory ]
 ```
 
-Now you can add:
+现在你可以添加:
 
 ``` html
 <script src="entry.js"></script>
 ```
 
-to your page to load the entry file. From inside the entry file, you can
-dynamically load other bundles with a `loadjs()` function:
+到你的页面去加载整个文件. 在入口文件内部, 你可以用 `loadjs()` 函数去动态的加载其他
+打包文件:
 
 ``` js
 a.addEventListener('click', function() {
@@ -2010,18 +2002,14 @@ a.addEventListener('click', function() {
 
 # compiler pipeline
 
-Since version 5, browserify exposes its compiler pipeline as a
-[labeled-stream-splicer](https://www.npmjs.org/package/labeled-stream-splicer).
+从版本5以来, browserify暴露出内部的编译流程, 作为一个 [labeled-stream-splicer](https://www.npmjs.org/package/labeled-stream-splicer) 实例.
 
-This means that transformations can be added or removed directly into the
-internal pipeline. This pipeline provides a clean interface for advanced
-customizations such as watching files or factoring bundles from multiple entry
-points. 
+这意味着转换操作可以直接从内部流程线添加或删除. 这个流程线为高级自定义提供了一个干净
+的接口, 例如监视文件更改或者根据入口分析输出分割至多个打包文件.
 
-For example, we could replace the built-in integer-based labeling mechanism with
-hashed IDs by first injecting a pass-through transform after the "deps" have
-been calculated to hash source files. Then we can use the hashes we captured to
-create our own custom labeler, replacing the built-in "label" transform:
+例如, 我们可以将内建的以整数为基准的模块命名方案替换掉, 换成Hashed IDs的命名方案.
+通过注入一个pass-through, 在deps已经计算好整个源代码的哈希值之后. 然后我们可以利用计算
+好的哈希值创建我们自己的命名方案, 并将内建的命名方案替换掉:
 
 ``` js
 var browserify = require('browserify');
@@ -2053,8 +2041,7 @@ b.pipeline.get('label').splice(0, 1, labeler);
 b.bundle().pipe(process.stdout);
 ```
 
-Now instead of getting integers for the IDs in the output format, we get file
-hashes:
+现在, 我们得到了基于文本内容的哈希值命名方案, 而不是整数ID:
 
 ```
 $ node bundle.js
@@ -2073,102 +2060,90 @@ module.exports = function (n) { return n + 1 };
 },{}]},{},["5f0a0e3a143f2356582f58a70f385f4bde44f04b"]);
 ```
 
-Note that the built-in labeler does other things like checking for the external,
-excluded configurations so replacing it will be difficult if you depend on those
-features. This example just serves as an example for the kinds of things you can
-do by hacking into the compiler pipeline.
+注意, 内建的命名方案做了一些其他的事情, 例如检查外部依赖(external), 排除文件(exclude),
+所以如果你依赖这些特性的话, 将整个命名方案替换掉会很困难. 这个例子只是简单的演示你可以
+修改内部的编译器流水线.
 
 ## build your own browserify
 
 ## labeled phases
 
-Each phase in the browserify pipeline has a label that you can hook onto. Fetch
-a label with `.get(name)` to return a
-[labeled-stream-splicer](https://npmjs.org/package/labeled-stream-splicer)
-handle at the appropriate label. Once you have a handle, you can `.push()`,
-`.pop()`, `.shift()`, `.unshift()`, and `.splice()` your own transform streams
-into the pipeline or remove existing transform streams.
+browserify处理线的每个阶段都有一个名字, 你就可以进行插入代码修改. 通过 `.get(name)`
+来让 [labeled-stream-splicer](https://npmjs.org/package/labeled-stream-splicer) 
+返回一个正确的label. 一旦你有了这个阶段的引用之后, 你可以 `.push()`, `.pop()`, 
+`.shift()`, `.unshift()`, 以及 `.splice()` 你自己的转换流至处理器流水线, 或者移除
+已有的转换流.
 
 ### recorder
 
-The recorder is used to capture the inputs sent to the `deps` phase so that they
-can be replayed on subsequent calls to `.bundle()`. Unlike in previous releases,
-v5 can generate bundle output multiple times. This is very handy for tools like
-watchify that re-bundle when a file has changed.
+记录器(recorder)是用来捕捉发送到 `deps` 阶段的输入, 以至于他们可以在随后的 `.bundle()`
+调用中重放. 不同于之前的释出版本, v5可以多次生成打包文件. 这对于像 watchify 这样每次
+文件更改时去重新生成打包文件, 非常方便.
 
 ### deps
 
-The `deps` phase expects entry and `require()` files or objects as input and
-calls [module-deps](https://npmjs.org/package/module-deps) to generate a stream
-of json output for all of the files in the dependency graph.
+依赖处理(deps) 阶段希望输入入口文件以及 `require()` 文件或者对象, 然后调用
+[module-deps](https://npmjs.org/package/module-deps) 来生成一个包含依赖图中
+所有文件的json的流.
 
-module-deps is invoked with some customizations here such as:
+module-deps 模块被调用时, 有一些自定义选项例如:
 
-* setting up the browserify transform key for package.json
-* filtering out external, excluded, and ignored files
-* setting the default extensions for `.js` and `.json` plus options configured
-in the `opts.extensions` parameter in the browserify constructor
-* configuring a global [insert-module-globals](#insert-module-globals)
-transform to detect and implement `process`, `Buffer`, `global`, `__dirname`,
-and `__filename`
-* setting up the list of node builtins which are shimmed by browserify
+* 设置browserify为package.json的转换字段
+* 过滤出外部依赖(external), 排除的文件(excluded), 以及忽略的文件(ignored)
+* 设置默认的后缀名为 `.js` 和 `.json` 加上browserify构造器中的 `opt.extensions` 选项
+* 确定全局变量 [insert-module-globals](#insert-module-globals), 检查以及提供 `process`, `Buffer`, `global`, `__dirname`,
+以及 `__filename` 的实现.
+* 设置应该由browserify提供实现的node内置模块
 
 ### json
 
-This transform adds `module.exports=` in front of files with a `.json`
-extension.
+这个转换为 `.json` 文件在最前面添加 `module.exports = `
 
 ### unbom
 
-This transform removes byte order markers, which are sometimes used by windows
-text editors to indicate the endianness of files. These markers are ignored by
-node, so browserify ignores them for compatibility.
+这个转换移除了BOM(byte order markers)头. 用于windows上某些文本编辑器检测文件编码.
+这些标记会被node忽略, 所以browserify为了兼容性也忽略他们.
 
 ### syntax
 
-This transform checks for syntax errors using the
-[syntax-error](https://npmjs.org/package/syntax-error) package to give
-informative syntax errors with line and column numbers.
+这个转换使用 [syntax-error](https://npmjs.org/package/syntax-error) 包来检查语法错误.
+并提供了错误行数和列数等有用信息.
 
 ### sort
 
-This phase uses [deps-sort](https://www.npmjs.org/package/deps-sort) to sort
-the rows written to it in order to make the bundles deterministic.
+这个阶段使用 [deps-sort](https://www.npmjs.org/package/deps-sort) 来排序所有的
+文件(在browserify stream表现为 row), 使最后的打包具有确定的顺序.
 
 ### dedupe
 
-The transform at this phase uses dedupe information provided by
-[deps-sort](https://www.npmjs.org/package/deps-sort) in the `sort` phase to
-remove files that have duplicate contents. 
+这个阶段的转换使用在 `sort` 阶段的 [deps-sort](https://www.npmjs.org/package/deps-sort)
+提供的重复信息来去除某些包含重复内容的文件.
 
 ### label
 
-This phase converts file-based IDs which might expose system path information
-and inflate the bundle size into integer-based IDs.
+这个阶段将可能泄露系统路径信息的基于文件的IDs转换为基于整形数字的IDs.
 
-The `label` phase will also normalize path names based on the `opts.basedir` or
-`process.cwd()` to avoid exposing system path information.
+命名(`label`)阶段将会使用 `opts.basedir` 或者 `process.cwd()` 将文件路径都正常化.
+以防止泄露系统路径信息.
 
 ### emit-deps
 
-This phase emits a `'dep'` event for each row after the `label` phase.
+这个阶段将会对 `label` 阶段后的每一行(即每一个文件)引发一个 `'dep'` 事件,
 
 ### debug
 
-If `opts.debug` was given to the `browserify()` constructor, this phase will
-transform input to add `sourceRoot` and `sourceFile` properties which are used
-by [browser-pack](https://npmjs.org/package/browser-pack) in the `pack` phase.
+如果 `opts.debug` 被传递到了 `browserify()` 构造器, 这个阶段将会转换输入, 以添加
+`sourceRoot` 和 `sourceFile` 属性, 用于 `pack` 阶段的 
+[browser-pack](https://npmjs.org/package/browser-pack).
 
 ### pack
 
-This phase converts rows with `'id'` and `'source'` parameters as input (among
-others) and generates the concatenated javascript bundle as output
-using [browser-pack](https://npmjs.org/package/browser-pack).
+这个阶段将带有 `id` 和 `source` 的文件行作为输入, 然后使用
+[browser-pack](https://npmjs.org/package/browser-pack) 来生成包含所有依赖的打包文件.
 
 ### wrap
 
-This is an empty phase at the end where you can easily tack on custom post
-transformations without interfering with existing mechanics.
+这是结束时一个空的阶段, 你可以在这个阶段轻松修改打包信息而不用修改已有的机制.
 
 ## browser-unpack
 
