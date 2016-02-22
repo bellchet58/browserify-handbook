@@ -2147,14 +2147,12 @@ module-deps 模块被调用时, 有一些自定义选项例如:
 
 ## browser-unpack
 
-[browser-unpack](https://npmjs.org/package/browser-unpack) converts a compiled
-bundle file back into a format very similar to the output of
-[module-deps](https://npmjs.org/package/module-deps).
+[browser-unpack](https://npmjs.org/package/browser-unpack) 会将一个编译过的打包文件
+回转成一种类似 [module-deps](https://npmjs.org/package/module-deps) 的输出的格式.
 
-This is very handy if you need to inspect or transform a bundle that has already
-been compiled.
+这种方式在你想查看或者转换一个已经编译打包好的文件时非常方便.
 
-For example:
+例如:
 
 ``` js
 $ browserify src/main.js | browser-unpack
@@ -2167,31 +2165,28 @@ $ browserify src/main.js | browser-unpack
 ]
 ```
 
-This decomposition is needed by tools such as
-[factor-bundle](https://www.npmjs.org/package/factor-bundle)
-and [bundle-collapser](https://www.npmjs.org/package/bundle-collapser).
+这种分解方式对于类似 [factor-bundle](https://www.npmjs.org/package/factor-bundle)
+和 [bundle-collapser](https://www.npmjs.org/package/bundle-collapser) 等工具来说是
+必要的.
 
 # plugins
 
-When loaded, plugins have access to the browserify instance itself.
+插件在加载时, 可以访问browserify实例自身.
 
 ## using plugins
 
-Plugins should be used sparingly and only in cases where a transform or global
-transform is not powerful enough to perform the desired functionality.
+插件只应该用在那些转换器或者全局转换器不够强大去完成想要的功能时使用.
 
-You can load a plugin with `-p` on the command-line:
+你可以使用 `-p` 选项在命令行工具中去加载一个插件:
 
 ```
 $ browserify main.js -p foo > bundle.js
 ```
 
-would load a plugin called `foo`. `foo` is resolved with `require()`, so to load
-a local file as a plugin, preface the path with a `./` and to load a plugin from
-`node_modules/foo`, just do `-p foo`.
+会去加载一个叫 `foo` 的插件. `foo` 将会被 `require()` 函数处理, 如果要加载一个本地文件
+作为插件, 加上 `./` 前缀即可. 要从 `node_modules/foo` 加载插件, 只需 `-p foo`.
 
-You can pass options to plugins with square brackets around the entire plugin
-expression, including the plugin name as the first argument:
+你可以为插件传递参数, 使用方括号来包裹整个语句, 包括第一个参数, 即是插件名.
 
 ```
 $ browserify one.js two.js \
@@ -2199,16 +2194,15 @@ $ browserify one.js two.js \
   > common.js
 ```
 
-This command-line syntax is parsed by the
-[subarg](https://npmjs.org/package/subarg) package.
+这中命令行语法是使用 [subarg](https://npmjs.org/package/subarg) 解析的.
 
-To see a list of browserify plugins, browse npm for packages with the keyword
-"browserify-plugin": http://npmjs.org/browse/keyword/browserify-plugin
+查看更多的browserify插件, 使用 `browserify-plugins` 搜索npm即可: 
+http://npmjs.org/browse/keyword/browserify-plugin
 
 ## authoring plugins
 
-To author a plugin, write a package that exports a single function that will
-receive a bundle instance and options object as arguments:
+要创建一个插件, 需要写一个导出单个函数的包, 该函数接受一个browserify bundle实例
+参数, 和一个选项(options)作为第二个参数:
 
 ``` js
 // example plugin
@@ -2218,6 +2212,5 @@ module.exports = function (b, opts) {
 }
 ```
 
-Plugins operate on the bundle instance `b` directly by listening for events or
-splicing transforms into the pipeline. Plugins should not overwrite bundle
-methods unless they have a very good reason.
+插件可通过监听各种事件或者直接在编译流水线上增删转换器(transform)来直接操作browserify
+bundle 实例. 插件不应该取重写覆盖该bundle实例上的方法, 除非你有一个非常好的理由.
