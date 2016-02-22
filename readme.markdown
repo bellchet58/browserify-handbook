@@ -1868,22 +1868,19 @@ b.exclude('foo')
 
 # shimming
 
-Unfortunately, some packages are not written with node-style commonjs exports.
-For modules that export their functionality with globals or AMD, there are
-packages that can help automatically convert these troublesome packages into
-something that browserify can understand.
+不幸的是, 某些包不是使用node-style的commonjs规范的. 对于那些使用全局变量或者AMD方式运作的
+模块, 这里有些包可以自动的帮助你将那些麻烦的包转换为browserify可以理解的包.
 
 ## browserify-shim
 
-One way to automatically convert non-commonjs packages is with
+一种可以自动转换非commonjs包的方式, 通过
 [browserify-shim](https://npmjs.org/package/browserify-shim).
 
-[browserify-shim](https://npmjs.org/package/browserify-shim) is loaded as a
-transform and also reads a `"browserify-shim"` field from `package.json`.
+[browserify-shim](https://npmjs.org/package/browserify-shim) 是作为一个转换器(transform)加载的.
+他可以读取 `package.json` 中的 `browserify-shim`字段.
 
-Suppose we need to use a troublesome third-party library we've placed in
-`./vendor/foo.js` that exports its functionality as a window global called
-`FOO`. We can set up our `package.json` with:
+假设我们需要转换放在 `./vendor/foo.js` 的第三方库, 这个库通过window全部变量 `FOO` 暴露它的功能. 
+我们可以这样设置我们的 `package.json`: 
 
 ``` json
 {
@@ -1896,12 +1893,11 @@ Suppose we need to use a troublesome third-party library we've placed in
 }
 ```
 
-and now when we `require('./vendor/foo.js')`, we get the `FOO` variable that
-`./vendor/foo.js` tried to put into the global scope, but that attempt was
-shimmed away into an isolated context to prevent global pollution.
+当我们 `require('./vendor/foo.js')`, 我们可以得到 `./vendor/foo.js` 试图在全局作用域设置的 `FOO` 变量.
+但是那个视图被隔离到了一个单独的上下文中, 以防止全局变量污染.
 
-We could even use the [browser field](#browser-field) to make `require('foo')`
-work instead of always needing to use a relative path to load `./vendor/foo.js`:
+我们甚至可以使用 [browser字段](#browser-field) 来使 `require('foo')` 正常工作, 而不必
+每次都是使用一个相对路径 `./vendor/foo.js` 去加载.
 
 ``` json
 {
@@ -1917,15 +1913,12 @@ work instead of always needing to use a relative path to load `./vendor/foo.js`:
 }
 ```
 
-Now `require('foo')` will return the `FOO` export that `./vendor/foo.js` tried
-to place on the global scope.
+现在 `require('foo')` 将会返回 `./vendor/foo.js` 试图设置在全局作用域的 `FOO` 变量.
 
 # partitioning
 
-Most of the time, the default method of bundling where one or more entry files
-map to a single bundled output file is perfectly adequate, particularly
-considering that bundling minimizes latency down to a single http request to
-fetch all the javascript assets.
+大部分情况下, 默认的将一个或多个入口文件打包成单个输出是非常合适的, 特别是考虑到 
+将等待时间减少至一个http请求就获取到了所有的javascript资源.
 
 However, sometimes this initial penalty is too high for parts of a website that
 are rarely or never used by most visitors such as an admin panel.
