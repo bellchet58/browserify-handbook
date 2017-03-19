@@ -350,7 +350,7 @@ var clone = require('dat/lib/clone.js')
 递归的node_modules机制将会顺着文件夹层级向上找到第一个 `dat` 包, 然后从该位置找 `lib/clone.js` .
 这种方法可以在任何可以使用 `require*('dat')` 的地方使用.
 
-node同样包含一个搜寻路径数组的机智, 但是这种机智已经被废弃, 你应该使用 `node_modules` 除非
+node同样包含一个搜寻路径数组的机制, 但是这种机制已经被废弃, 你应该使用 `node_modules` 除非
 你有很好的理由不去使用它.
 
 node模块查找算法以及npm安装的模块的好处在于, 你永远不会碰到版本冲突的情况, 不同于其他所有的平台, npm
